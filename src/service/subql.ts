@@ -1,5 +1,8 @@
+import { assert } from 'console';
 import { gql, request } from 'graphql-request'
 import { getAppLogger, sleeps } from '../libs'
+import { LendingAction } from '../models';
+import { addNewAction } from './pgsql';
 
 const log = getAppLogger("service-subql");
 
@@ -72,24 +75,95 @@ async function blockScanner(block: number, option: ScannerOption) {
         }
     }
 }
-
-export async function lendingActionScanner(block: number, handler: (block: number, query: any) => Promise<void>) {
-    const options: ScannerOption = {
-        endpoint: 'http://localhost:3000',
-        entity: "lendingActions",
-        fields: `id
-            address
-            asset
-            assetId
-            value
-            method
-            blockHeight
-            timestamp
-        `,
-        handler
-    }
-    blockScanner(block, options)
+type ActionNode = {
+    id: string,
+    blockHeight: number,
+    address: string,
+    method: string,
+    assetId: number,
+    value: string,
+    exchangeRate: string,
+    timestamp: string
 }
+
+type positionNode = {
+    id: string,
+    blockHeight: number,
+    address: string,
+    assetId: number,
+    borrowIndex: string
+    supplyBalance: string,
+    borrowBalance: string,
+    exchangeRate: string,
+    totalEarnedPrior: number,
+    exchangeRatePrior: string,
+    timestamp: string
+}
+
+type MarketConfigNode = {
+    id: string,
+    blockHeight: number,
+    assetId: number,
+    collateralFactor: string,
+    closeFactor: string,
+    reserveFactor: string,
+    borrowCap: string,
+    liquidationIncentive: string,
+    timestamp: string
+}
+
+type AssetConfigNode = {
+    id: string,
+    assetId: number,
+    blockHeight: number,
+    totalSupply: string,
+    totalBorrows: string,
+    totalReserves: string,
+    borrowIndex: string,
+    borrowRate: string,
+    supplyRate: string,
+    exchangeRate: string,
+    utilizationRatio: string
+}
+
+type LastAccruedNode = {
+    blockHeight: number
+    lastAccruedTimestamp: string
+}
+
+function getTokenById(assetId: number): string {
+    // TODO: cache
+    switch(assetId) {
+        case 100:
+            return 'KSM'
+        case 102:
+            return 'USDT'
+        default:
+            return 'UNKNOWN'
+    }
+}
+
+async function actionHandler(nodes: ActionNode[]) {
+    try {
+        nodes.forEach(async node => {
+            log.debug(`action node: %o`, node)
+            const re = await addNewAction({
+                block_number: node.blockHeight,
+                tx_hash: node.id,
+                address: node.address,
+                token: getTokenById(node.assetId),
+                amount: node.value,
+                method: node.method,
+                exchange_rate: node.exchangeRate,
+                timestamp: node.timestamp
+            } as LendingAction)
+            log.debug('add action result: %o', re)
+        })
+    } catch (e: any) {
+        log.error(`handle action nodes error: %o`, e)
+    }
+}
+
 
 export async function lendingScanner(endpoint: string, block: number) {
     log.info('lending scanner run')
@@ -116,6 +190,7 @@ export async function lendingScanner(endpoint: string, block: number) {
                               address
                               method
                               value
+                              exchangeRate
                               timestamp
                           }
                       }
@@ -200,22 +275,22 @@ export async function lendingScanner(endpoint: string, block: number) {
                   }
               }`
             );
-            const { query: { 
-                lendingActions, 
+            const { query: {
+                lendingActions,
                 lendingPositions,
                 lendingConfigures,
                 assetConfigures,
                 lastAccruedTimestamps
-             } } = res
+            } } = res
             const actionNodes = lendingActions.nodes
             const positionNodes = lendingPositions.nodes
             const configNodes = lendingConfigures.nodes
             const assetNodes = assetConfigures.nodes
             const lastAccruedTimestamp = lastAccruedTimestamps.nodes[0].lastAccruedTimestamp
             log.debug(`last accrued timestamp: ${lastAccruedTimestamp}`)
-            if (lendingActions.nodes.length > 0) {
-                log.info(`action result: %o`, actionNodes)
-            }
+
+            actionHandler(actionNodes)
+
             if (lendingPositions.nodes.length > 0) {
                 log.info('position result: %o', positionNodes)
             }
@@ -237,6 +312,7 @@ export async function lendingScanner(endpoint: string, block: number) {
                 );
             }
             block = newBlock;
+            await sleeps(2)
         } catch (e: any) {
             log.error(`block scanner error: %o`, e);
         }
