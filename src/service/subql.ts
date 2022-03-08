@@ -162,6 +162,28 @@ export async function lendingScanner(endpoint: string, block: number) {
                               timestamp
                           }
                       }
+                      assetConfigures(
+                        orderBy: BLOCK_HEIGHT_ASC,
+                          filter: {
+                              blockHeight: {
+                                  equalTo: ${block}
+                              }
+                          }
+                      ) {
+                          nodes {
+                              id
+                              blockHeight
+                              assetId
+                              totalSupply
+                              totalBorrows
+                              totalReserves
+                              borrowIndex
+                              borrowRate
+                              supplyRate
+                              exchangeRate
+                              utilizationRatio
+                          }
+                      }
                       lastAccruedTimestamps(
                         orderBy: BLOCK_HEIGHT_ASC,
                           filter: {
@@ -182,11 +204,13 @@ export async function lendingScanner(endpoint: string, block: number) {
                 lendingActions, 
                 lendingPositions,
                 lendingConfigures,
+                assetConfigures,
                 lastAccruedTimestamps
              } } = res
             const actionNodes = lendingActions.nodes
             const positionNodes = lendingPositions.nodes
             const configNodes = lendingConfigures.nodes
+            const assetNodes = assetConfigures.nodes
             const lastAccruedTimestamp = lastAccruedTimestamps.nodes[0].lastAccruedTimestamp
             log.debug(`last accrued timestamp: ${lastAccruedTimestamp}`)
             if (lendingActions.nodes.length > 0) {
@@ -197,6 +221,9 @@ export async function lendingScanner(endpoint: string, block: number) {
             }
             if (configNodes.length > 0) {
                 //
+            }
+            if (assetNodes.length > 0) {
+                // log.info('asset configure result: %o', assetNodes[0])
             }
             // option.handler(block, res);
             const newBlock = block + 1;
