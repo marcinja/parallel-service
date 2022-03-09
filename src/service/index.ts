@@ -31,7 +31,7 @@ async function lendingScannerHandler(block: number, query: any) {
                 token: r.asset,
                 exchange_rate: rate,
                 block_number: r.blockHeight,
-                timestamp: r.timestamp
+                block_timestamp: r.timestamp
             } as LendingAction)
 
         });

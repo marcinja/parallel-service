@@ -1,8 +1,7 @@
 import { gql, request } from 'graphql-request'
-import { loggers } from 'winston';
 import { getAppLogger, sleeps } from '../libs'
-import { LendingAction, LendingAssetConfigure, LendingMarketConfigure } from '../models';
-import { addNewAction, addNewAssetConfig, addNewMarketConfig } from './pgsql';
+import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../models';
+import { addNewAction, addNewAssetConfig, addNewMarketConfig, addNewPosition } from './pgsql';
 
 const log = getAppLogger("service-subql");
 
@@ -135,15 +134,37 @@ function getTokenById(assetId: number): string {
             return 'KSM'
         case 102:
             return 'USDT'
+        case 103: 
+            return 'KUSD'
+        case 107:
+            return 'KAR'
+        case 109:
+            return 'LKSM'
+        case 201:
+            return 'EUSDT'
+        case 202:
+            return 'EUSDC'
+        case 1000:
+            return 'xKSM'
         default:
             return 'UNKNOWN'
     }
 }
 
+function getDecimalByToken(token: string): number {
+    const maps: Record<string, number> = {
+        'DOT': 10,
+        'KSM': 12,
+        'USDT': 6,
+        'xDOT': 10,
+        'xKSM': 12,
+    }
+    return maps[token] || 10
+}
+
 async function actionHandler(nodes: ActionNode[]) {
     try {
         nodes.forEach(async node => {
-            log.debug(`action node: %o`, node)
             const re = await addNewAction({
                 block_number: node.blockHeight,
                 tx_hash: node.id,
@@ -152,7 +173,7 @@ async function actionHandler(nodes: ActionNode[]) {
                 amount: node.value,
                 method: node.method,
                 exchange_rate: node.exchangeRate,
-                timestamp: node.timestamp
+                block_timestamp: node.timestamp
             } as LendingAction)
             log.debug('add action result: %o', re)
         })
@@ -164,7 +185,15 @@ async function actionHandler(nodes: ActionNode[]) {
 async function positionHandler(nodes: PositionNode[]) {
     try {
         nodes.forEach(async node => {
-            
+            addNewPosition({
+                address: node.address,
+                token: getTokenById(node.assetId),
+                supply_balance: node.supplyBalance,
+                borrow_balance: node.borrowBalance,
+                exchange_rate: node.exchangeRate,
+                block_number: node.blockHeight,
+                block_timestamp: node.timestamp
+            } as LendingPosition)
         });
 
     } catch(e: any) {
@@ -175,18 +204,19 @@ async function positionHandler(nodes: PositionNode[]) {
 async function marketHandler(nodes: MarketConfigNode[]) {
     try {
         nodes.forEach(async node => {
-            log.debug(`market status: ${node.marketStatus}`)
+            const token = getTokenById(node.assetId)
+            const decimals =  getDecimalByToken(token)
             const re = await addNewMarketConfig({
-                symbol: 'TODO',
+                symbol: token,
                 collateral_factor: node.collateralFactor,
                 close_factor: node.closeFactor,
                 reserve_factor: node.reserveFactor,
                 borrow_cap: node.borrowCap,
                 liquidation_incentive: node.liquidationIncentive,
-                decimals: 10,
+                decimals,
                 borrow_enabled: node.marketStatus === 'Active',
                 block_number: node.blockHeight,
-                timestamp: node.timestamp
+                block_timestamp: node.timestamp
             } as LendingMarketConfigure)
         })
 
@@ -329,13 +359,11 @@ export async function lendingScanner(endpoint: string, block: number) {
 
             actionHandler(actionNodes)
 
+            positionHandler(positionNodes)
+
             marketHandler(marketNodes)
 
             assetHandler(assetNodes)
-
-            if (lendingPositions.nodes.length > 0) {
-                log.info('position result: %o', positionNodes)
-            }
 
             // option.handler(block, res);
             const newBlock = block + 1;

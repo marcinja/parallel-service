@@ -33,5 +33,5 @@ export class LendingMarketConfigure extends BaseEntity {
     block_number!: number
 
     @Column({ type: 'timestamptz'})
-    timestamp!: string
+    block_timestamp!: string
 }
