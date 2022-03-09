@@ -1,8 +1,8 @@
-import { assert } from 'console';
 import { gql, request } from 'graphql-request'
+import { loggers } from 'winston';
 import { getAppLogger, sleeps } from '../libs'
-import { LendingAction } from '../models';
-import { addNewAction } from './pgsql';
+import { LendingAction, LendingAssetConfigure, LendingMarketConfigure } from '../models';
+import { addNewAction, addNewAssetConfig, addNewMarketConfig } from './pgsql';
 
 const log = getAppLogger("service-subql");
 
@@ -86,7 +86,7 @@ type ActionNode = {
     timestamp: string
 }
 
-type positionNode = {
+type PositionNode = {
     id: string,
     blockHeight: number,
     address: string,
@@ -109,6 +109,7 @@ type MarketConfigNode = {
     reserveFactor: string,
     borrowCap: string,
     liquidationIncentive: string,
+    marketStatus: string,
     timestamp: string
 }
 
@@ -123,11 +124,7 @@ type AssetConfigNode = {
     borrowRate: string,
     supplyRate: string,
     exchangeRate: string,
-    utilizationRatio: string
-}
-
-type LastAccruedNode = {
-    blockHeight: number
+    utilizationRatio: string,
     lastAccruedTimestamp: string
 }
 
@@ -164,6 +161,61 @@ async function actionHandler(nodes: ActionNode[]) {
     }
 }
 
+async function positionHandler(nodes: PositionNode[]) {
+    try {
+        nodes.forEach(async node => {
+            
+        });
+
+    } catch(e: any) {
+
+    }
+}
+
+async function marketHandler(nodes: MarketConfigNode[]) {
+    try {
+        nodes.forEach(async node => {
+            log.debug(`market status: ${node.marketStatus}`)
+            const re = await addNewMarketConfig({
+                symbol: 'TODO',
+                collateral_factor: node.collateralFactor,
+                close_factor: node.closeFactor,
+                reserve_factor: node.reserveFactor,
+                borrow_cap: node.borrowCap,
+                liquidation_incentive: node.liquidationIncentive,
+                decimals: 10,
+                borrow_enabled: node.marketStatus === 'Active',
+                block_number: node.blockHeight,
+                timestamp: node.timestamp
+            } as LendingMarketConfigure)
+        })
+
+    } catch(e: any) {
+        log.error(`handle market configure error: %o`, e)
+    }
+}
+
+async function assetHandler(nodes: AssetConfigNode[]) {
+    try {
+        nodes.forEach(async node => {
+            addNewAssetConfig({
+                block_number: node.blockHeight,
+                asset_id: node.assetId,
+                total_supply: node.totalSupply,
+                total_borrows: node.totalBorrows,
+                total_reserves: node.totalReserves,
+                borrow_index: node.borrowIndex,
+                borrow_rate: node.borrowRate,
+                supply_rate: node.supplyRate,
+                exchange_rate: node.exchangeRate,
+                utilization_ratio: node.utilizationRatio,
+                last_accrued_timestamp: node.lastAccruedTimestamp
+            } as LendingAssetConfigure)
+        })
+    } catch(e: any) {
+        log.error(`handle asset configure error: %o`, e)
+    }
+}
 
 export async function lendingScanner(endpoint: string, block: number) {
     log.info('lending scanner run')
@@ -217,7 +269,7 @@ export async function lendingScanner(endpoint: string, block: number) {
                               timestamp
                           }
                       }
-                      lendingConfigures(
+                      lendingMarketConfigures(
                         orderBy: BLOCK_HEIGHT_ASC,
                           filter: {
                               blockHeight: {
@@ -234,10 +286,11 @@ export async function lendingScanner(endpoint: string, block: number) {
                               reserveFactor
                               liquidationIncentive
                               borrowCap
+                              marketStatus
                               timestamp
                           }
                       }
-                      assetConfigures(
+                      lendingAssetConfigures(
                         orderBy: BLOCK_HEIGHT_ASC,
                           filter: {
                               blockHeight: {
@@ -257,18 +310,6 @@ export async function lendingScanner(endpoint: string, block: number) {
                               supplyRate
                               exchangeRate
                               utilizationRatio
-                          }
-                      }
-                      lastAccruedTimestamps(
-                        orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block}
-                              }
-                          }
-                      ) {
-                          nodes {
-                              blockHeight
                               lastAccruedTimestamp
                           }
                       }
@@ -278,28 +319,24 @@ export async function lendingScanner(endpoint: string, block: number) {
             const { query: {
                 lendingActions,
                 lendingPositions,
-                lendingConfigures,
-                assetConfigures,
-                lastAccruedTimestamps
+                lendingMarketConfigures,
+                lendingAssetConfigures,
             } } = res
             const actionNodes = lendingActions.nodes
             const positionNodes = lendingPositions.nodes
-            const configNodes = lendingConfigures.nodes
-            const assetNodes = assetConfigures.nodes
-            const lastAccruedTimestamp = lastAccruedTimestamps.nodes[0].lastAccruedTimestamp
-            log.debug(`last accrued timestamp: ${lastAccruedTimestamp}`)
+            const marketNodes = lendingMarketConfigures.nodes
+            const assetNodes = lendingAssetConfigures.nodes
 
             actionHandler(actionNodes)
+
+            marketHandler(marketNodes)
+
+            assetHandler(assetNodes)
 
             if (lendingPositions.nodes.length > 0) {
                 log.info('position result: %o', positionNodes)
             }
-            if (configNodes.length > 0) {
-                //
-            }
-            if (assetNodes.length > 0) {
-                // log.info('asset configure result: %o', assetNodes[0])
-            }
+
             // option.handler(block, res);
             const newBlock = block + 1;
             while (newBlock > lastProcessedHeight) {

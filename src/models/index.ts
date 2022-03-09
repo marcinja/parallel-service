@@ -1,11 +1,13 @@
 import { createConnection, Connection } from 'typeorm'
 import { LendingAction } from './action'
-import { LendingConfigure } from './market_config'
+import { LendingMarketConfigure } from './market_config'
+import { LendingAssetConfigure } from './asset_config'
 import { LendingPosition } from './position'
 
 export * from './action'
 export * from './position'
 export * from './market_config'
+export * from './asset_config'
 
 const ENV = process.env
 
@@ -21,7 +23,8 @@ export async function initDB(): Promise<Connection> {
         entities: [
             LendingAction,
             LendingPosition,
-            LendingConfigure
+            LendingMarketConfigure,
+            LendingAssetConfigure
         ],
         synchronize: true
     })

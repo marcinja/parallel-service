@@ -1,7 +1,7 @@
 import { BaseEntity, Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "lending_market_config"})
-export class LendingConfigure extends BaseEntity {
+export class LendingMarketConfigure extends BaseEntity {
     @PrimaryGeneratedColumn()
     id!: string
 
@@ -12,16 +12,16 @@ export class LendingConfigure extends BaseEntity {
     collateral_factor!: string
 
     @Column()
-    borrow_cap!: number // market cap
+    borrow_cap!: string // market cap
 
     @Column()
-    close_factor!: number
+    close_factor!: string
 
     @Column()
-    liquidation_incentive!: number
+    liquidation_incentive!: string
 
     @Column()
-    reserve_factor!: number
+    reserve_factor!: string
 
     @Column()
     decimals!: number
@@ -33,5 +33,5 @@ export class LendingConfigure extends BaseEntity {
     block_number!: number
 
     @Column({ type: 'timestamptz'})
-    timestamp!: Date
+    timestamp!: string
 }
