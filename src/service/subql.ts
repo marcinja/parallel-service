@@ -175,7 +175,6 @@ async function actionHandler(nodes: ActionNode[]) {
                 exchange_rate: node.exchangeRate,
                 block_timestamp: node.timestamp
             } as LendingAction)
-            log.debug('add action result: %o', re)
         })
     } catch (e: any) {
         log.error(`handle action nodes error: %o`, e)

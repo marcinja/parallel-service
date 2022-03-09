@@ -28,20 +28,7 @@ app
 unexpectListener()
 app.listen('4321', async () => {
     log.info('app listen on 4321')
-    await init()
     const conn = await initDB()
 
     Service.run()
 })
-
-const ENDPOINT = 'wss://regnet-rpc.parallel.fi'
-
-async function init() {
-    const api = await ApiService.init(ENDPOINT)
-
-    const rate = await ApiService.getExchangeRate(100)
-    console.log('%o', rate)
-
-    const balance = await ApiService.getBalance(100, 'hJLQoRFTEnxkAz4m15N29btT5vvn6gLCzjm5dZYaVRPtrRZLK')
-    console.log(`balance: %o`, balance)
-}

@@ -3,6 +3,7 @@ import { getAppLogger } from '../libs'
 import { addNewAction } from './pgsql'
 import { LendingAction } from '../models'
 import { ApiService } from './query'
+import { RedisService } from './redis'
 
 export * from './pgsql'
 export * from './query'
@@ -40,9 +41,9 @@ async function lendingScannerHandler(block: number, query: any) {
     }
 }
 
-
 export default class Service {
     static run() {
-        lendingScanner('http://localhost:3000', 36876)
+        RedisService.getUsers()
+        lendingScanner(process.env.SUBQUERY_ENDPOINT!, 36876)
     }
 }

@@ -24,7 +24,6 @@ export class ApiService {
     static async getExchangeRate(assetId: number): Promise<string> {
         const re = (await (await this.api.at('0x420a8f7c7d08256280a18b67a70b85d44eb455c16e0f5101cbc39259f8ffe52e')).query.loans.exchangeRate(assetId)).toString()
         const re1 = (await (await this.api.query.loans.exchangeRate(assetId))).toString()
-        log.error(`${re}, ${re1}`)
         return re1
     }
 
