@@ -2,6 +2,7 @@ import { gql, request } from 'graphql-request'
 import { getAppLogger, sleeps } from '../libs'
 import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../models';
 import { addNewAction, addNewAssetConfig, addNewMarketConfig, addNewPosition } from './pgsql';
+import { RedisService } from './redis';
 
 const log = getAppLogger("service-subql");
 
@@ -127,49 +128,15 @@ type AssetConfigNode = {
     lastAccruedTimestamp: string
 }
 
-function getTokenById(assetId: number): string {
-    // TODO: cache
-    switch(assetId) {
-        case 100:
-            return 'KSM'
-        case 102:
-            return 'USDT'
-        case 103: 
-            return 'KUSD'
-        case 107:
-            return 'KAR'
-        case 109:
-            return 'LKSM'
-        case 201:
-            return 'EUSDT'
-        case 202:
-            return 'EUSDC'
-        case 1000:
-            return 'xKSM'
-        default:
-            return 'UNKNOWN'
-    }
-}
-
-function getDecimalByToken(token: string): number {
-    const maps: Record<string, number> = {
-        'DOT': 10,
-        'KSM': 12,
-        'USDT': 6,
-        'xDOT': 10,
-        'xKSM': 12,
-    }
-    return maps[token] || 10
-}
-
 async function actionHandler(nodes: ActionNode[]) {
     try {
         nodes.forEach(async node => {
+            const token = await RedisService.getToken(node.assetId)
             const re = await addNewAction({
                 block_number: node.blockHeight,
                 tx_hash: node.id,
                 address: node.address,
-                token: getTokenById(node.assetId),
+                token,
                 amount: node.value,
                 method: node.method,
                 exchange_rate: node.exchangeRate,
@@ -184,9 +151,15 @@ async function actionHandler(nodes: ActionNode[]) {
 async function positionHandler(nodes: PositionNode[]) {
     try {
         nodes.forEach(async node => {
+            const token = await RedisService.getToken(node.assetId)
+            // if (token === null) {
+            //     log.error(`invalid asset id: ${node.assetId}`)
+            //     continue
+            // }
+            // log.debug(`[${node.assetId}]-[${node.address}]-${token}`)
             addNewPosition({
                 address: node.address,
-                token: getTokenById(node.assetId),
+                token,
                 supply_balance: node.supplyBalance,
                 borrow_balance: node.borrowBalance,
                 exchange_rate: node.exchangeRate,
@@ -203,8 +176,8 @@ async function positionHandler(nodes: PositionNode[]) {
 async function marketHandler(nodes: MarketConfigNode[]) {
     try {
         nodes.forEach(async node => {
-            const token = getTokenById(node.assetId)
-            const decimals =  getDecimalByToken(token)
+            const token = await RedisService.getToken(node.assetId)
+            const decimals =  await RedisService.getDecimals(token)
             const re = await addNewMarketConfig({
                 symbol: token,
                 collateral_factor: node.collateralFactor,
@@ -356,6 +329,9 @@ export async function lendingScanner(endpoint: string, block: number) {
             const marketNodes = lendingMarketConfigures.nodes
             const assetNodes = lendingAssetConfigures.nodes
 
+            // TODO：
+            // 1. to filter has been recorded item when rescan
+
             actionHandler(actionNodes)
 
             positionHandler(positionNodes)
@@ -364,8 +340,10 @@ export async function lendingScanner(endpoint: string, block: number) {
 
             assetHandler(assetNodes)
 
-            // option.handler(block, res);
+            // update scanner last block
             const newBlock = block + 1;
+            RedisService.updateLastBlock(newBlock)
+
             while (newBlock > lastProcessedHeight) {
                 //   option.emiter.getEvtCount() && option.emiter.done();
                 // sleep 5s
@@ -376,7 +354,6 @@ export async function lendingScanner(endpoint: string, block: number) {
                 );
             }
             block = newBlock;
-            await sleeps(2)
         } catch (e: any) {
             log.error(`block scanner error: %o`, e);
         }

@@ -96,7 +96,20 @@ namespace User {
 
 namespace Cache {
     const C = 'Cache'
+
+    export const hToken = (): string => {
+        return `H_Cache_token`
+    }
+
+    export const hDecimals = (): string => {
+        return `H_Cache_decimals`
+    }
+
+    export const lastBlock = (): string => {
+        return `Cache_last_block`
+    }
 }
+
 
 export const KEYS = {
     User,

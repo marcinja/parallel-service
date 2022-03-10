@@ -44,9 +44,37 @@ cacheRedis.onError((err: string) => {
 })
 
 const userRd = userRedis.getClient()
+const cacheRd = cacheRedis.getClient()
 
 export class RedisService {
-    static async getUsers() {
-        return await userRd.hgetall(KEYS.User.hUser())
+    static async getLastBlock(): Promise<number> {
+        const block = await cacheRd.get(KEYS.Cache.lastBlock())
+        if (block === null) {
+            log.error(`last block cache should be initialized`)
+            throw(`last block cache should be initialized`)
+        }
+        return Number(block)
+    }
+
+    static async updateLastBlock(block: number) {
+        return cacheRd.set(KEYS.Cache.lastBlock(), block)
+    }
+
+    static async getToken(assetId: number): Promise<string> {
+        const token = await cacheRd.hget(KEYS.Cache.hToken(), assetId.toString())
+        if (token === null) {
+            log.error(`invalid asset id: ${assetId}`)
+            throw(`invalid asset id: ${assetId}`)
+        }
+        return token
+    }
+
+    static async getDecimals(token: string): Promise<number> {
+        const decimals = await cacheRd.hget(KEYS.Cache.hDecimals(), token)
+        if (decimals === null) {
+            log.error(`invalid token symbol: ${token}`)
+            throw(`invalid token symbol: ${token}`)
+        }
+        return Number(decimals)
     }
 }

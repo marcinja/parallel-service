@@ -42,8 +42,8 @@ async function lendingScannerHandler(block: number, query: any) {
 }
 
 export default class Service {
-    static run() {
-        RedisService.getUsers()
-        lendingScanner(process.env.SUBQUERY_ENDPOINT!, 36876)
+    static async run() {
+        const lastBlock = await RedisService.getLastBlock()
+        lendingScanner(process.env.SUBQUERY_ENDPOINT!, lastBlock)
     }
 }
