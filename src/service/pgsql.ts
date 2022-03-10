@@ -30,7 +30,16 @@ export async function addNewPosition(item: LendingPosition) {
 }
 
 export async function addNewMarketConfig(item: LendingMarketConfigure) {
-    return await LendingMarketConfigure.insert(item)
+    try {
+        return await LendingMarketConfigure.insert(item)
+    } catch (e: any) {
+        const { message } = e
+        if ((message as string).includes('duplicate key')) {
+            log.warn(`${item.id} has been record, ignore!`)
+            return
+        }
+        log.error('add error: %o', message)
+    }
 }
 
 export async function addNewAssetConfig(item: LendingAssetConfigure) {

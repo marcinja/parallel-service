@@ -1,8 +1,8 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity({name: 'lending_asset_config'})
 export class LendingAssetConfigure extends BaseEntity {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id!: string
 
     @Column()
@@ -37,4 +37,7 @@ export class LendingAssetConfigure extends BaseEntity {
 
     @Column()
     last_accrued_timestamp!: string
+
+    @Column()
+    block_timestamp!: string
 }

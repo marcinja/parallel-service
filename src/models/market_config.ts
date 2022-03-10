@@ -1,8 +1,8 @@
-import { BaseEntity, Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Entity, Column, PrimaryColumn } from "typeorm";
 
 @Entity({ name: "lending_market_config"})
 export class LendingMarketConfigure extends BaseEntity {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id!: string
 
     @Column()

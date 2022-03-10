@@ -1,8 +1,8 @@
-import { notEqual } from 'assert';
 import { gql, request } from 'graphql-request'
-import { getAppLogger, sleeps } from '../libs'
+import { Connection } from 'typeorm';
+import { dayTimestamp, getAppLogger, sleeps } from '../libs'
 import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../models';
-import { addNewAction, addNewAssetConfig, addNewMarketConfig, addNewPosition } from './pgsql';
+import { addNewAction, addNewPosition } from './pgsql';
 import { RedisService } from './redis';
 
 const log = getAppLogger("service-subql");
@@ -27,55 +27,6 @@ export async function lastProcessedData(url: string): Promise<SubqlMeta> {
     return _metadata;
 }
 
-
-type ScannerOption = {
-    endpoint: string;
-    entity: string;
-    fields: string;
-    handler: (block: number, res: any) => Promise<void>;
-};
-
-async function blockScanner(block: number, option: ScannerOption) {
-    let { lastProcessedHeight } = await lastProcessedData(option.endpoint);
-    log.debug(`current lastProcessedHeight: ${lastProcessedHeight}`);
-    while (true) {
-        try {
-            const res = await request(
-                option.endpoint,
-                gql`{
-                  query {
-                      ${option.entity}(
-                          orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block}
-                              }
-                          }
-                      ) {
-                          nodes {${option.fields}}
-                      }
-
-
-                  }
-              }`
-            );
-            option.handler(block, res);
-            const newBlock = block + 1;
-            while (newBlock > lastProcessedHeight) {
-                //   option.emiter.getEvtCount() && option.emiter.done();
-                // sleep 5s
-                await sleeps(5000);
-                lastProcessedHeight = (await lastProcessedData(option.endpoint)).lastProcessedHeight;
-                log.info(
-                    `sleep for a while...\nfetch new lastProcessedHeight: ${lastProcessedHeight}`
-                );
-            }
-            block = newBlock;
-        } catch (e: any) {
-            log.error(`block scanner error: %o`, e);
-        }
-    }
-}
 type ActionNode = {
     id: string,
     blockHeight: number,
@@ -131,7 +82,8 @@ type AssetConfigNode = {
     supplyRate: string,
     exchangeRate: string,
     utilizationRatio: string,
-    lastAccruedTimestamp: string
+    lastAccruedTimestamp: string,
+    timestamp: string
 }
 
 async function actionHandler(nodes: ActionNode[]) {
@@ -172,61 +124,68 @@ async function positionHandler(nodes: PositionNode[]) {
             } as LendingPosition)
         });
 
-    } catch(e: any) {
+    } catch (e: any) {
 
     }
 }
 
-async function marketHandler(nodes: MarketConfigNode[]) {
+async function marketHandler(conn: Connection, nodes: MarketConfigNode[]) {
     try {
         nodes.forEach(async node => {
             const token = await RedisService.getToken(node.assetId)
-            const decimals =  await RedisService.getDecimals(token)
-            const re = await addNewMarketConfig({
-                symbol: token,
-                collateral_factor: node.collateralFactor,
-                close_factor: node.closeFactor,
-                reserve_factor: node.reserveFactor,
-                borrow_cap: node.borrowCap,
-                liquidation_incentive: node.liquidationIncentive,
-                decimals,
-                borrow_enabled: node.marketStatus === 'Active',
-                block_number: node.blockHeight,
-                block_timestamp: node.timestamp
-            } as LendingMarketConfigure)
+            const decimals = await RedisService.getDecimals(token)
+
+            const day = dayTimestamp(node.timestamp)
+            conn.getRepository(LendingMarketConfigure)
+                .save({
+                    id: `${node.assetId}-${day}`,
+                    symbol: token,
+                    collateral_factor: node.collateralFactor,
+                    close_factor: node.closeFactor,
+                    reserve_factor: node.reserveFactor,
+                    borrow_cap: node.borrowCap,
+                    liquidation_incentive: node.liquidationIncentive,
+                    decimals,
+                    borrow_enabled: node.marketStatus === 'Active',
+                    block_number: node.blockHeight,
+                    block_timestamp: node.timestamp
+                } as LendingMarketConfigure)
         })
 
-    } catch(e: any) {
+    } catch (e: any) {
         log.error(`handle market configure error: %o`, e)
     }
 }
 
-async function assetHandler(nodes: AssetConfigNode[]) {
+async function assetHandler(conn: Connection, nodes: AssetConfigNode[]) {
     try {
         nodes.forEach(async node => {
-            addNewAssetConfig({
-                block_number: node.blockHeight,
-                asset_id: node.assetId,
-                total_supply: node.totalSupply,
-                total_borrows: node.totalBorrows,
-                total_reserves: node.totalReserves,
-                borrow_index: node.borrowIndex,
-                borrow_rate: node.borrowRate,
-                supply_rate: node.supplyRate,
-                exchange_rate: node.exchangeRate,
-                utilization_ratio: node.utilizationRatio,
-                last_accrued_timestamp: node.lastAccruedTimestamp
-            } as LendingAssetConfigure)
+            const day = dayTimestamp(node.timestamp)
+            conn.getRepository(LendingAssetConfigure)
+                .save({
+                    id: `${node.assetId}-${day}`,
+                    block_number: node.blockHeight,
+                    asset_id: node.assetId,
+                    total_supply: node.totalSupply,
+                    total_borrows: node.totalBorrows,
+                    total_reserves: node.totalReserves,
+                    borrow_index: node.borrowIndex,
+                    borrow_rate: node.borrowRate,
+                    supply_rate: node.supplyRate,
+                    exchange_rate: node.exchangeRate,
+                    utilization_ratio: node.utilizationRatio,
+                    last_accrued_timestamp: node.lastAccruedTimestamp,
+                    block_timestamp: node.timestamp
+                } as LendingAssetConfigure)
         })
-    } catch(e: any) {
+    } catch (e: any) {
         log.error(`handle asset configure error: %o`, e)
     }
 }
 
-export async function lendingScanner(endpoint: string, block: number) {
-    log.info('lending scanner run')
+export async function lendingScanner(endpoint: string, block: number, conn: Connection) {
     let { lastProcessedHeight } = await lastProcessedData(endpoint);
-    log.debug(`current lastProcessedHeight: ${lastProcessedHeight}`);
+    log.debug(`lending scanner run, current lastProcessedHeight: ${lastProcessedHeight}`);
     while (true) {
         try {
             const res = await request(
@@ -300,6 +259,7 @@ export async function lendingScanner(endpoint: string, block: number) {
                               exchangeRate
                               utilizationRatio
                               lastAccruedTimestamp
+                              timestamp
                           }
                       }
                   }
@@ -314,21 +274,17 @@ export async function lendingScanner(endpoint: string, block: number) {
             const marketNodes = lendingMarketConfigures.nodes
             const assetNodes = lendingAssetConfigures.nodes
 
-            // TODO：
-            // 1. to filter has been recorded item when rescan
-
             actionHandler(actionNodes)
 
-            marketHandler(marketNodes)
+            marketHandler(conn, marketNodes)
 
-            assetHandler(assetNodes)
+            assetHandler(conn, assetNodes)
 
             // update scanner last block
             const newBlock = block + 1;
             RedisService.updateLastBlock(newBlock)
 
             while (newBlock > lastProcessedHeight) {
-                //   option.emiter.getEvtCount() && option.emiter.done();
                 // sleep 5s
                 await sleeps(5);
                 lastProcessedHeight = (await lastProcessedData(endpoint)).lastProcessedHeight;
