@@ -1,3 +1,4 @@
+import { notEqual } from 'assert';
 import { gql, request } from 'graphql-request'
 import { getAppLogger, sleeps } from '../libs'
 import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../models';
@@ -83,7 +84,12 @@ type ActionNode = {
     assetId: number,
     value: string,
     exchangeRate: string,
-    timestamp: string
+    borrowIndex: string
+    supplyBalance: string,
+    borrowBalance: string,
+    timestamp: string,
+    totalEarnedPrior: number,
+    exchangeRatePrior: string,
 }
 
 type PositionNode = {
@@ -91,7 +97,7 @@ type PositionNode = {
     blockHeight: number,
     address: string,
     assetId: number,
-    borrowIndex: string
+    borrowIndex: string,
     supplyBalance: string,
     borrowBalance: string,
     exchangeRate: string,
@@ -133,13 +139,16 @@ async function actionHandler(nodes: ActionNode[]) {
         nodes.forEach(async node => {
             const token = await RedisService.getToken(node.assetId)
             const re = await addNewAction({
+                id: node.id,
                 block_number: node.blockHeight,
-                tx_hash: node.id,
                 address: node.address,
                 token,
                 amount: node.value,
                 method: node.method,
                 exchange_rate: node.exchangeRate,
+                supply_balance: node.supplyBalance,
+                borrow_balance: node.borrowBalance,
+                borrow_index: node.borrowIndex,
                 block_timestamp: node.timestamp
             } as LendingAction)
         })
@@ -152,11 +161,6 @@ async function positionHandler(nodes: PositionNode[]) {
     try {
         nodes.forEach(async node => {
             const token = await RedisService.getToken(node.assetId)
-            // if (token === null) {
-            //     log.error(`invalid asset id: ${node.assetId}`)
-            //     continue
-            // }
-            // log.debug(`[${node.assetId}]-[${node.address}]-${token}`)
             addNewPosition({
                 address: node.address,
                 token,
@@ -245,32 +249,15 @@ export async function lendingScanner(endpoint: string, block: number) {
                               method
                               value
                               exchangeRate
+                              borrowIndex
+                              borrowBalance
+                              supplyBalance
                               timestamp
+                              totalEarnedPrior
+                              exchangeRatePrior
                           }
                       }
 
-                      lendingPositions(
-                        orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block}
-                              }
-                          }
-                      ) {
-                          nodes {
-                              id
-                              blockHeight
-                              address
-                              assetId
-                              borrowIndex
-                              supplyBalance
-                              borrowBalance
-                              exchangeRate
-                              totalEarnedPrior
-                              exchangeRatePrior
-                              timestamp
-                          }
-                      }
                       lendingMarketConfigures(
                         orderBy: BLOCK_HEIGHT_ASC,
                           filter: {
@@ -320,12 +307,10 @@ export async function lendingScanner(endpoint: string, block: number) {
             );
             const { query: {
                 lendingActions,
-                lendingPositions,
                 lendingMarketConfigures,
                 lendingAssetConfigures,
             } } = res
             const actionNodes = lendingActions.nodes
-            const positionNodes = lendingPositions.nodes
             const marketNodes = lendingMarketConfigures.nodes
             const assetNodes = lendingAssetConfigures.nodes
 
@@ -333,8 +318,6 @@ export async function lendingScanner(endpoint: string, block: number) {
             // 1. to filter has been recorded item when rescan
 
             actionHandler(actionNodes)
-
-            positionHandler(positionNodes)
 
             marketHandler(marketNodes)
 

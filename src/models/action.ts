@@ -2,14 +2,11 @@ import { Entity, Column, BaseEntity, PrimaryColumn, PrimaryGeneratedColumn } fro
 
 @Entity({ name: "lending_action"})
 export class LendingAction extends BaseEntity {
-    @PrimaryGeneratedColumn()
-    id!: string
+    @PrimaryColumn()
+    id!: string     // tx hash
 
     @Column()
     address!: string
-
-    @Column()
-    tx_hash!: string
 
     @Column()
     token!: string
@@ -19,6 +16,15 @@ export class LendingAction extends BaseEntity {
 
     @Column()
     method!: string
+
+    @Column()
+    supply_balance!: string
+
+    @Column()
+    borrow_balance!: string
+
+    @Column()
+    borrow_index!: string
 
     @Column()
     exchange_rate!: string
