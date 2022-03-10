@@ -1,10 +1,10 @@
 
 
-import { BaseEntity, Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Entity, Column, PrimaryColumn } from "typeorm";
 
 @Entity({name: "lending_position"})
 export class LendingPosition extends BaseEntity {
-    @PrimaryGeneratedColumn()
+    @PrimaryColumn()
     id!: string
 
     @Column()

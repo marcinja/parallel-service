@@ -89,8 +89,8 @@ export class RedisPool {
 
 namespace User {
     const U = 'User'
-    export const hUser = (): string => {
-        return 'user'
+    export const hUser = (address: string): string => {
+        return `H_User_${address}`
     }
 }
 

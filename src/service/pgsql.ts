@@ -26,7 +26,16 @@ export async function isActionExisted(hash: string) {
 }
 
 export async function addNewPosition(item: LendingPosition) {
-    return await LendingPosition.insert(item)
+    try {
+        return await LendingPosition.insert(item)
+    } catch (e: any) {
+        const { message } = e
+        if ((message as string).includes('duplicate key')) {
+            log.warn(`${item.id} has been record, ignore!`)
+            return
+        }
+        log.error('add error: %o', message)
+    }
 }
 
 export async function addNewMarketConfig(item: LendingMarketConfigure) {

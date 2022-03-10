@@ -86,10 +86,11 @@ type AssetConfigNode = {
     timestamp: string
 }
 
-async function actionHandler(nodes: ActionNode[]) {
+async function actionHandler(conn: Connection, nodes: ActionNode[]) {
     try {
         nodes.forEach(async node => {
             const token = await RedisService.getToken(node.assetId)
+            //
             const re = await addNewAction({
                 id: node.id,
                 block_number: node.blockHeight,
@@ -103,29 +104,39 @@ async function actionHandler(nodes: ActionNode[]) {
                 borrow_index: node.borrowIndex,
                 block_timestamp: node.timestamp
             } as LendingAction)
+
+            positionHandler(conn, node)
+
         })
     } catch (e: any) {
         log.error(`handle action nodes error: %o`, e)
     }
 }
 
-async function positionHandler(nodes: PositionNode[]) {
+async function positionHandler(conn: Connection, node: ActionNode) {
+    // add or update new position data according to action
+    // update account & asset info to redis cache
+
     try {
-        nodes.forEach(async node => {
-            const token = await RedisService.getToken(node.assetId)
-            addNewPosition({
-                address: node.address,
-                token,
-                supply_balance: node.supplyBalance,
-                borrow_balance: node.borrowBalance,
-                exchange_rate: node.exchangeRate,
-                block_number: node.blockHeight,
-                block_timestamp: node.timestamp
-            } as LendingPosition)
-        });
+        const token = await RedisService.getToken(node.assetId)
+        const day = dayTimestamp(node.timestamp)
+
+        await conn.getRepository(LendingPosition).save({
+            id: `${node.address}-${node.assetId}-${day}`,
+            address: node.address,
+            token,
+            supply_balance: node.supplyBalance,
+            borrow_balance: node.borrowBalance,
+            exchange_rate: node.exchangeRate,
+            block_number: node.blockHeight,
+            block_timestamp: node.timestamp
+        } as LendingPosition)
+
+        // update cache
+        await RedisService.updateAccount(node.address, node.assetId)
 
     } catch (e: any) {
-
+        log.error(`handle position error: %o`, e)
     }
 }
 
@@ -185,7 +196,7 @@ async function assetHandler(conn: Connection, nodes: AssetConfigNode[]) {
 
 export async function lendingScanner(endpoint: string, block: number, conn: Connection) {
     let { lastProcessedHeight } = await lastProcessedData(endpoint);
-    log.debug(`lending scanner run, current lastProcessedHeight: ${lastProcessedHeight}`);
+    log.info(`lending scanner run, current lastProcessedHeight: ${lastProcessedHeight}`);
     while (true) {
         try {
             const res = await request(
@@ -274,7 +285,7 @@ export async function lendingScanner(endpoint: string, block: number, conn: Conn
             const marketNodes = lendingMarketConfigures.nodes
             const assetNodes = lendingAssetConfigures.nodes
 
-            actionHandler(actionNodes)
+            actionHandler(conn, actionNodes)
 
             marketHandler(conn, marketNodes)
 
@@ -285,10 +296,11 @@ export async function lendingScanner(endpoint: string, block: number, conn: Conn
             RedisService.updateLastBlock(newBlock)
 
             while (newBlock > lastProcessedHeight) {
+
                 // sleep 5s
                 await sleeps(5);
                 lastProcessedHeight = (await lastProcessedData(endpoint)).lastProcessedHeight;
-                log.info(
+                log.debug(
                     `sleep for a while...\nfetch new lastProcessedHeight: ${lastProcessedHeight}`
                 );
             }

@@ -29,32 +29,7 @@ unexpectListener()
 app.listen('4321', async () => {
     log.info('app listen on 4321')
     const conn = await initDB()
+    await ApiService.init(process.env.SUBSTRATE_ENDPOINT!)
 
-    conn.getRepository(LendingMarketConfigure).save({
-        id: '1234',
-        symbol: 'KSM',
-        collateral_factor: '100',
-        borrow_cap: '1000',
-        close_factor: '10000',
-        liquidation_incentive: '100000',
-        reserve_factor: '1323',
-        decimals: 10,
-        borrow_enabled: true,
-        block_number: 12345,
-        block_timestamp: '2022-03-10T09:36:42.037'
-    } as LendingMarketConfigure)
-    conn.getRepository(LendingMarketConfigure).save({
-        id: '1234',
-        symbol: 'KSM',
-        collateral_factor: '100',
-        borrow_cap: '1000',
-        close_factor: '10000',
-        liquidation_incentive: '100000',
-        reserve_factor: '1323',
-        decimals: 10,
-        borrow_enabled: true,
-        block_number: 12345,
-        block_timestamp: '2022-03-10T09:36:42.037'
-    })
     Service.run(conn)
 })

@@ -1,3 +1,4 @@
+import Mom from 'moment'
 import { getAppLogger, Redis, DBT, KEYS } from '../libs'
 
 const log = getAppLogger('redis')
@@ -43,7 +44,7 @@ cacheRedis.onError((err: string) => {
     process.exit(2)
 })
 
-const userRd = userRedis.getClient()
+export const userRd = userRedis.getClient()
 const cacheRd = cacheRedis.getClient()
 
 export class RedisService {
@@ -76,5 +77,9 @@ export class RedisService {
             throw(`invalid token symbol: ${token}`)
         }
         return Number(decimals)
+    }
+
+    static async updateAccount(address: string, assetId: number) {
+        userRd.hset(KEYS.User.hUser(address), assetId, Mom().utc().toString())
     }
 }
