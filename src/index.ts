@@ -3,9 +3,9 @@ import Koa from 'koa'
 import KoaBody from 'koa-body'
 import Router from 'koa-router'
 import { getAppLogger, unexpectListener } from './libs'
-import { actionRouter } from './routers'
+import { actionRouter, marketRouter, positionRouter, assetRouter } from './routers'
 import { accessControl, accessMidware, errHanldle, responseTime } from './middleware'
-import { initDB, LendingMarketConfigure } from './models'
+import { initDB } from './models'
 import Service from './service'
 import { ApiService } from './service'
 
@@ -13,8 +13,10 @@ const log = getAppLogger('app')
 const app = new Koa()
 const router = new Router()
 
-router.use('/parallel/action', actionRouter)
-// router.use('/', ActionRouter)
+router.use('/action', actionRouter)
+router.use('/market', marketRouter)
+router.use('/position', positionRouter)
+router.use('/asset', assetRouter)
 
 app
     .use(accessMidware)
