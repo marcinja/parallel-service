@@ -20,7 +20,7 @@ export const delays = (sec: number, cb?: () => void) => {
     }, sec * 1000);
 }
 
-export const blockTimestamp = (timestamp: string): number => {
+export const utcBlockTimestamp = (timestamp: string): number => {
     return Mom(timestamp).utc(true).startOf('day').valueOf()
 }
 
@@ -28,7 +28,7 @@ export const blocktimeToStamp = (time: number): string => {
     return Mom.unix(time/1000).utc(true).toString()
 }
 
-export const dayTimestamp = (timestamp: string): number => {
+export const localToUtcTimestamp = (timestamp: string): number => {
     const day = Mom(timestamp).utc().startOf('day')
     log.debug(`block timestamp[${timestamp}] to day: ${day}-${day.valueOf()}`)
     return day.valueOf()

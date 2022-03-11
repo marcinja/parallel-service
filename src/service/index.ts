@@ -2,7 +2,7 @@ import { Connection } from 'typeorm'
 import She from 'node-schedule'
 import Mom from 'moment'
 import { lendingScanner } from './subql'
-import { getAppLogger, KEYS } from '../libs'
+import { getAppLogger } from '../libs'
 import { RedisService, userRd } from './redis'
 import { ApiService } from './query'
 import { LendingPosition } from '../models'
@@ -11,8 +11,6 @@ export * from './pgsql'
 export * from './query'
 
 const HOUR_SCHEDULER = '0 */1 * * *'
-const MIN_SCHEDULER = '* * * * *'
-
 const log = getAppLogger('service')
 
 async function positionUpdate(conn: Connection) {
@@ -62,7 +60,7 @@ export default class Service {
         const lastBlock = await RedisService.getLastBlock()
         lendingScanner(process.env.SUBQUERY_ENDPOINT!, lastBlock, conn)
 
-        const positionHourlyJob = She.scheduleJob(MIN_SCHEDULER, () => {
+        const positionHourlyJob = She.scheduleJob(HOUR_SCHEDULER, () => {
             positionUpdate(conn)
         })
 
@@ -77,7 +75,5 @@ export default class Service {
             log.error(`position hourly job canceled: %o`, reason)
             throw (`position hourly job down!`)
         })
-
-
     }
 }

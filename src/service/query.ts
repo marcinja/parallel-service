@@ -2,7 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api'
 import { options } from '@parallel-finance/api'
 import { typesBundle } from '@parallel-finance/type-definitions'
 import { BigNumber } from 'bignumber.js'
-import { getAppLogger } from '../libs'
+import { blocktimeToStamp, getAppLogger } from '../libs'
 import moment from 'moment'
 
 const log = getAppLogger('service-query')
@@ -80,9 +80,9 @@ export class ApiService {
         const curBlock = Number((await this.api.query.system.number()).toHex())
         const curBlockHash = (await this.api.rpc.chain.getBlockHash(curBlock)).toString()
         const blockTimestamp = Number((await (await this.api.at(curBlockHash)).query.timestamp.now()).toHex())
-        const timestamp = moment.unix(blockTimestamp / 1000).utc().toString()
+        const timestamp = blocktimeToStamp(blockTimestamp)
 
-        log.debug(`${curBlock}-${curBlockHash}-${blockTimestamp}-${timestamp}`)
+        log.debug(`handle account position meta: block[${curBlock}]-blockHash[${curBlockHash}]-${blockTimestamp}-${timestamp}`)
 
         const re: any = await Promise.all([
             this.getAccountBorrows(assetId, address, curBlockHash),
