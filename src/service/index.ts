@@ -57,7 +57,11 @@ async function positionUpdate(conn: Connection) {
 
 export default class Service {
     static async run(conn: Connection) {
+        
+        await RedisService.initAssetCache()
+
         const lastBlock = await RedisService.getLastBlock()
+
         lendingScanner(process.env.SUBQUERY_ENDPOINT!, lastBlock, conn)
 
         const positionHourlyJob = She.scheduleJob(HOUR_SCHEDULER, () => {

@@ -1,5 +1,6 @@
 import Mom from 'moment'
 import { getAppLogger, Redis, DBT, KEYS } from '../libs'
+import { ApiService } from './query'
 
 const log = getAppLogger('redis')
 
@@ -48,6 +49,18 @@ export const userRd = userRedis.getClient()
 const cacheRd = cacheRedis.getClient()
 
 export class RedisService {
+
+    static async initAssetCache() {
+        const assetIds = await ApiService.getAssets()
+        for (let assetId of assetIds) {
+            const meta = await ApiService.getAssetMeta(assetId)
+            await Promise.all([
+                this.setToken(assetId, meta.symbol),
+                this.setDecimals(assetId, meta.decimals)
+            ])
+        }
+    }
+
     static async getLastBlock(): Promise<number> {
         const block = await cacheRd.get(KEYS.Cache.lastBlock())
         if (block === null) {
@@ -61,6 +74,10 @@ export class RedisService {
         return cacheRd.set(KEYS.Cache.lastBlock(), block)
     }
 
+    static async setToken(assetId: number, token: string) {
+        await cacheRd.hset(KEYS.Cache.hToken(), assetId.toString(), token)
+    }
+
     static async getToken(assetId: number): Promise<string> {
         const token = await cacheRd.hget(KEYS.Cache.hToken(), assetId.toString())
         if (token === null) {
@@ -70,11 +87,16 @@ export class RedisService {
         return token
     }
 
-    static async getDecimals(token: string): Promise<number> {
-        const decimals = await cacheRd.hget(KEYS.Cache.hDecimals(), token)
+    static async setDecimals(assetId: number, decimals: number) {
+        await cacheRd.hset(KEYS.Cache.hDecimals(), assetId.toString(), decimals)
+    }
+
+
+    static async getDecimals(assetId: number): Promise<number> {
+        const decimals = await cacheRd.hget(KEYS.Cache.hDecimals(), assetId.toString())
         if (decimals === null) {
-            log.error(`invalid token symbol: ${token}`)
-            throw(`invalid token symbol: ${token}`)
+            log.error(`invalid assetId: ${assetId}`)
+            throw(`invalid assetId: ${assetId}`)
         }
         return Number(decimals)
     }

@@ -1,6 +1,6 @@
 import { gql, request } from 'graphql-request'
 import { Connection } from 'typeorm';
-import { blockTimestamp, getAppLogger, sleeps } from '../libs'
+import { getAppLogger, dayFromUtcTimestamp, sleeps } from '../libs'
 import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../models';
 import { addNewAction } from './pgsql';
 import { RedisService } from './redis';
@@ -119,7 +119,7 @@ async function positionHandler(conn: Connection, node: ActionNode) {
 
     try {
         const token = await RedisService.getToken(node.assetId)
-        const day = blockTimestamp(node.timestamp)
+        const day = dayFromUtcTimestamp(node.timestamp)
 
         await conn.getRepository(LendingPosition).save({
             id: `${node.address}-${node.assetId}-${day}`,
@@ -144,9 +144,9 @@ async function marketHandler(conn: Connection, nodes: MarketConfigNode[]) {
     try {
         nodes.forEach(async node => {
             const token = await RedisService.getToken(node.assetId)
-            const decimals = await RedisService.getDecimals(token)
+            const decimals = await RedisService.getDecimals(node.assetId)
 
-            const day = blockTimestamp(node.timestamp)
+            const day = dayFromUtcTimestamp(node.timestamp)
             conn.getRepository(LendingMarketConfigure)
                 .save({
                     id: `${node.assetId}-${day}`,
@@ -171,7 +171,7 @@ async function marketHandler(conn: Connection, nodes: MarketConfigNode[]) {
 async function assetHandler(conn: Connection, nodes: AssetConfigNode[]) {
     try {
         nodes.forEach(async node => {
-            const day = blockTimestamp(node.timestamp)
+            const day = dayFromUtcTimestamp(node.timestamp)
             conn.getRepository(LendingAssetConfigure)
                 .save({
                     id: `${node.assetId}-${day}`,

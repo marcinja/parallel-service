@@ -2,8 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api'
 import { options } from '@parallel-finance/api'
 import { typesBundle } from '@parallel-finance/type-definitions'
 import { BigNumber } from 'bignumber.js'
-import { blocktimeToStamp, getAppLogger } from '../libs'
-import moment from 'moment'
+import { toUtcTimestamp, getAppLogger } from '../libs'
 
 const log = getAppLogger('service-query')
 
@@ -20,6 +19,14 @@ export type PositionData = {
     exchangeRate: string
 }
 
+type AssetMeta = {
+    deposit: number,
+    name: string,
+    symbol: string,
+    decimals: number,
+    isFrozen: boolean
+}
+
 export class ApiService {
     static api: ApiPromise
 
@@ -34,6 +41,27 @@ export class ApiService {
             })
         )
         this.api = api
+    }
+
+    static async getAssets(): Promise<number[]> {
+        try {
+            const assets = await this.api.query.loans.markets.keys()
+            return assets.map((key: any) => {
+                let asset: string = key.toHuman()[0]
+                if (asset.includes(',')) {
+                    asset = asset.replace(',', '')
+                }
+                return Number(asset)
+            })
+        } catch (e: any) {
+            log.error(`fetch asset list error: %o`, e)
+            throw('fetch asset id list error')
+        }
+    }
+
+    static async getAssetMeta(assetId: number): Promise<AssetMeta> {
+        const meta = (await this.api.query.assets.metadata(assetId)).toHuman()
+        return meta as unknown as AssetMeta
     }
 
     static async getExchangeRate(assetId: number, blockHash?: string): Promise<string> {
@@ -80,7 +108,7 @@ export class ApiService {
         const curBlock = Number((await this.api.query.system.number()).toHex())
         const curBlockHash = (await this.api.rpc.chain.getBlockHash(curBlock)).toString()
         const blockTimestamp = Number((await (await this.api.at(curBlockHash)).query.timestamp.now()).toHex())
-        const timestamp = blocktimeToStamp(blockTimestamp)
+        const timestamp = toUtcTimestamp(blockTimestamp)
 
         log.debug(`handle account position meta: block[${curBlock}]-blockHash[${curBlockHash}]-${blockTimestamp}-${timestamp}`)
 
