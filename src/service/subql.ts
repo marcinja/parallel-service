@@ -1,8 +1,8 @@
 import { gql, request } from 'graphql-request'
 import { Connection } from 'typeorm';
-import { dayTimestamp, getAppLogger, sleeps } from '../libs'
+import { blockTimestamp, getAppLogger, sleeps } from '../libs'
 import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../models';
-import { addNewAction, addNewPosition } from './pgsql';
+import { addNewAction } from './pgsql';
 import { RedisService } from './redis';
 
 const log = getAppLogger("service-subql");
@@ -119,7 +119,7 @@ async function positionHandler(conn: Connection, node: ActionNode) {
 
     try {
         const token = await RedisService.getToken(node.assetId)
-        const day = dayTimestamp(node.timestamp)
+        const day = blockTimestamp(node.timestamp)
 
         await conn.getRepository(LendingPosition).save({
             id: `${node.address}-${node.assetId}-${day}`,
@@ -146,7 +146,7 @@ async function marketHandler(conn: Connection, nodes: MarketConfigNode[]) {
             const token = await RedisService.getToken(node.assetId)
             const decimals = await RedisService.getDecimals(token)
 
-            const day = dayTimestamp(node.timestamp)
+            const day = blockTimestamp(node.timestamp)
             conn.getRepository(LendingMarketConfigure)
                 .save({
                     id: `${node.assetId}-${day}`,
@@ -171,7 +171,7 @@ async function marketHandler(conn: Connection, nodes: MarketConfigNode[]) {
 async function assetHandler(conn: Connection, nodes: AssetConfigNode[]) {
     try {
         nodes.forEach(async node => {
-            const day = dayTimestamp(node.timestamp)
+            const day = blockTimestamp(node.timestamp)
             conn.getRepository(LendingAssetConfigure)
                 .save({
                     id: `${node.assetId}-${day}`,
@@ -196,7 +196,7 @@ async function assetHandler(conn: Connection, nodes: AssetConfigNode[]) {
 
 export async function lendingScanner(endpoint: string, block: number, conn: Connection) {
     let { lastProcessedHeight } = await lastProcessedData(endpoint);
-    log.info(`lending scanner run, current lastProcessedHeight: ${lastProcessedHeight}`);
+    log.info(`lending scanner run at[${block}], current lastProcessedHeight: ${lastProcessedHeight}`);
     while (true) {
         try {
             const res = await request(
@@ -285,24 +285,22 @@ export async function lendingScanner(endpoint: string, block: number, conn: Conn
             const marketNodes = lendingMarketConfigures.nodes
             const assetNodes = lendingAssetConfigures.nodes
 
-            actionHandler(conn, actionNodes)
+            await Promise.all([
+                actionHandler(conn, actionNodes),
+                marketHandler(conn, marketNodes),
+                assetHandler(conn, assetNodes)
+            ])
 
-            marketHandler(conn, marketNodes)
-
-            assetHandler(conn, assetNodes)
 
             // update scanner last block
             const newBlock = block + 1;
-            RedisService.updateLastBlock(newBlock)
+            await RedisService.updateLastBlock(newBlock)
 
             while (newBlock > lastProcessedHeight) {
-
                 // sleep 5s
                 await sleeps(5);
                 lastProcessedHeight = (await lastProcessedData(endpoint)).lastProcessedHeight;
-                log.debug(
-                    `sleep for a while...\nfetch new lastProcessedHeight: ${lastProcessedHeight}`
-                );
+                log.debug(`sleep for a while...fetch new lastProcessedHeight: ${lastProcessedHeight}`)
             }
             block = newBlock;
         } catch (e: any) {
