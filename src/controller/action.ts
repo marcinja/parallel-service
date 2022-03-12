@@ -1,13 +1,13 @@
 import { Context } from "koa"
-import { FindOneOptions } from "typeorm"
-import { getAppLogger, Resp, parsePagenation } from "../libs"
+import { Between, FindOneOptions, LessThanOrEqual, MoreThan } from "typeorm"
+import { getAppLogger, Resp, parsePagenation, isValidInteger } from "../libs"
 import { LendingAction } from "../models"
 
 const log = getAppLogger('Controller-action')
 
 export async function getActionList(ctx: Context, next: any) {
     const { pageIndex, pageSize, skip } = parsePagenation(ctx)
-    const { address, symbol } = ctx.request.query
+    const { address, symbol, startBlock, endBlock } = ctx.request.query
     const findOptions: FindOneOptions = {
         order: {
             address: 'ASC',
@@ -26,6 +26,26 @@ export async function getActionList(ctx: Context, next: any) {
             token: symbol
         }
     }
+
+    const hasStart = isValidInteger(startBlock as string)
+    const hasEnd = isValidInteger(endBlock as string)
+    const byBlock = hasStart || hasEnd
+    let blockOperator
+    if (hasStart && !hasEnd) {
+        blockOperator = MoreThan(Number(startBlock))
+    } else if(!hasStart && hasEnd) {
+        blockOperator = LessThanOrEqual(endBlock)
+    } else if(hasStart && hasEnd) {
+        blockOperator = Between(startBlock, endBlock)
+    }
+
+    if (byBlock) {
+        findOptions.where = {
+            ...findOptions.where,
+            block_number: blockOperator
+        }
+    }
+
     const [list, totalSize] = await LendingAction.findAndCount({
         ...findOptions,
         take: pageSize,
@@ -37,29 +57,6 @@ export async function getActionList(ctx: Context, next: any) {
         pageSize,
         totalSize,
         pageCount,
-        list
-    })
-    return next
-}
-
-export async function getActionByBlock(ctx: Context, next: any) {
-    log.debug(`params: %o`, ctx.params)
-    const { block } = ctx.params
-    const { pageIndex, pageSize, skip } = parsePagenation(ctx)
-    const [list, totalSize] = await LendingAction.findAndCount({
-        where: {
-            block_number: block
-        },
-        skip,
-        take: pageSize
-    })
-    const pageCount = Math.floor(totalSize / pageSize) + 1
-
-    ctx.body = Resp.Ok({
-        pageIndex,
-        pageSize,
-        pageCount,
-        totalSize,
         list
     })
     return next

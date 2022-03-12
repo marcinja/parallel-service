@@ -1,7 +1,6 @@
 import She from 'node-schedule'
-import Mom from 'moment'
 import { lendingScanner } from './subql'
-import { getAppLogger } from '../libs'
+import { getAppLogger, todayTimestamp } from '../libs'
 import { RedisService, userRd } from './redis'
 import { ApiService } from './query'
 import { LendingPosition } from '../models'
@@ -32,7 +31,7 @@ async function positionUpdate() {
             assets.forEach(async assetId => {
 
                 const data = await ApiService.getAccountLendingStorage(address, Number(assetId))
-                const day = Mom().utc().startOf('day').valueOf()
+                const day = todayTimestamp()
                 const token = await RedisService.getToken(Number(assetId))
                 rep.save({
                     id: `${address}-${assetId}-${day}`,

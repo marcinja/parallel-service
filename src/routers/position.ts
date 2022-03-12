@@ -1,10 +1,10 @@
 import Router from "koa-router";
-import { getPositionList, getPositionByday } from "../controller"
+import { getPositionList, getLatestPositions } from "../controller"
 
 const R = new Router()
 
 R.get('/', getPositionList)
 
-R.get('/daily', getPositionByday)
+R.get('/latest', getLatestPositions)
 
 export const positionRouter = R.routes()
