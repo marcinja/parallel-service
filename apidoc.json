@@ -1,0 +1,7 @@
+{
+    "name": "parallel",
+    "version": "0.1.0",
+    "description": "parallel lending service api doc",
+    "url" : "http://localhost:4321",
+    "sampleUrl": "http://localhost:4321"
+  }
