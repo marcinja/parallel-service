@@ -6,7 +6,7 @@ import { LendingMarketConfigure } from "../models";
 const log = getAppLogger('Controller-market')
 
 export async function getAllMarkets(ctx: Context, next: any) {
-    const { take, skip } = parsePagenation(ctx)
+    const { pageIndex, pageSize, skip } = parsePagenation(ctx)
     const { symbol } = ctx.request.query
 
     const findOptions: FindOneOptions = {
@@ -20,17 +20,24 @@ export async function getAllMarkets(ctx: Context, next: any) {
             symbol
         }
     }
-    const re = await LendingMarketConfigure.find({
+    const [list, totalSize] = await LendingMarketConfigure.findAndCount({
         ...findOptions,
-        take,
+        take: pageSize,
         skip
     })
+    const pageCount = Math.floor(totalSize / pageSize) + 1
 
-    ctx.body = Resp.Ok(re)
+    ctx.body = Resp.Ok({
+        pageIndex,
+        pageSize,
+        pageCount,
+        totalSize,
+        list
+    })
     return next
 }
 
-export async function getAllLatestMarkets(ctx: Context, next: any) {
+export async function getLatestMarkets(ctx: Context, next: any) {
     const today = todayTimestamp()
     const re = await LendingMarketConfigure.find({
         where: {

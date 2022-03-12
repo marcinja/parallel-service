@@ -47,7 +47,8 @@ export const accessControl = (ctx: KCtxT, next: NextT) => {
     ctx.set('Content-Type', 'application/json')
     ctx.set('Access-Control-Expose-Headers', 'Access-Control-Allow-Origin')
     ctx.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
-    ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, PATCH, OPTIONS')
+    // ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, PATCH, OPTIONS')
+    ctx.set('Access-Control-Allow-Methods', 'GET')
     ctx.set('Access-Control-Allow-Credentials', 'true')
     return next()
 }

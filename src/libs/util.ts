@@ -38,13 +38,22 @@ export const todayTimestamp = (): number => {
     return Mom().utc(true).startOf('day').valueOf()
 }
 
-export function parsePagenation(ctx: Context) {
+type PageQuery = {
+    pageSize: number,
+    pageIndex: number,
+    skip: number
+}
+
+export function parsePagenation(ctx: Context): PageQuery {
     const { pageIndex, pageSize } = ctx.request.query
-    const take = pageSize && Number(pageSize) || 20
-    const skip = (Number(pageIndex) - 1) * Number(pageSize)
-    log.debug(`pagenation: index[${pageIndex}] size[${pageSize}], skip[${skip}] take[${take}]`)
+    const index = Number(pageIndex) || 1
+    const size = Number(pageSize) || 20
+
+    const skip = (index - 1) * size
+    log.debug(`pagenation: index[${pageIndex}] size[${pageSize}], skip[${skip}] take[${size}]`)
     return {
-        take,
+        pageIndex: index,
+        pageSize: size,
         skip
     }
 }

@@ -5,15 +5,23 @@ import { LendingPosition } from "../models";
 const log = getAppLogger('Controller-position')
 
 export async function getPositionList(ctx: Context, next: any) {
-    const { take, skip } = parsePagenation(ctx)
-    const re = await LendingPosition.find({
+    const { pageIndex, pageSize, skip } = parsePagenation(ctx)
+    const [list, totalSize] = await LendingPosition.findAndCount({
         order: {
             block_number: 'ASC'
         },
-        take,
+        take: pageSize,
         skip
     })
-    ctx.body = Resp.Ok(re)
+    const pageCount = Math.floor(totalSize / pageSize) + 1
+
+    ctx.body = Resp.Ok({
+        pageIndex,
+        pageSize,
+        pageCount,
+        totalSize,
+        list
+    })
     return next
 }
 

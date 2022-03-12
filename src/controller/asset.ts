@@ -6,7 +6,7 @@ import { LendingAssetConfigure } from "../models";
 const log = getAppLogger('Controller-asset')
 
 export async function getAllAssets(ctx: Context, next: any) {
-    const { take, skip } = parsePagenation(ctx)
+    const { pageIndex, pageSize, skip } = parsePagenation(ctx)
     const { assetId } = ctx.request.query
 
     if (!isValidInteger(assetId as string)) {
@@ -24,12 +24,20 @@ export async function getAllAssets(ctx: Context, next: any) {
             asset_id: assetId
         }
     }
-    const re = await LendingAssetConfigure.find({
+    const [list, totalSize] = await LendingAssetConfigure.findAndCount({
         ...findOptions,
-        take,
+        take: pageSize,
         skip
     })
-    ctx.body = Resp.Ok(re)
+    const pageCount = Math.floor(totalSize / pageSize) + 1
+
+    ctx.body = Resp.Ok({
+        pageIndex,
+        pageSize,
+        pageCount,
+        totalSize,
+        list
+    })
     return next
 }
 
