@@ -34,6 +34,10 @@ export const localToUtcTimestamp = (timestamp: string): number => {
     return day.valueOf()
 }
 
+export const todayTimestamp = (): number => {
+    return Mom().utc(true).startOf('day').valueOf()
+}
+
 export function parsePagenation(ctx: Context) {
     const { pageIndex, pageSize } = ctx.request.query
     const take = pageSize && Number(pageSize) || 20
@@ -43,4 +47,8 @@ export function parsePagenation(ctx: Context) {
         take,
         skip
     }
+}
+
+export function isValidInteger(input: string | number) {
+    return Number.isInteger(Number(input))
 }

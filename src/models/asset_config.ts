@@ -1,10 +1,11 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
+import { BaseEntity, Column, Entity, Index, PrimaryColumn } from "typeorm";
 
 @Entity({name: 'lending_asset_config'})
 export class LendingAssetConfigure extends BaseEntity {
     @PrimaryColumn()
     id!: string
 
+    @Index()
     @Column()
     block_number!: number
 

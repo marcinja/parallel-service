@@ -1,4 +1,3 @@
-import { Connection } from 'typeorm'
 import She from 'node-schedule'
 import Mom from 'moment'
 import { lendingScanner } from './subql'
@@ -6,6 +5,7 @@ import { getAppLogger } from '../libs'
 import { RedisService, userRd } from './redis'
 import { ApiService } from './query'
 import { LendingPosition } from '../models'
+import { getConnection } from 'typeorm'
 
 export * from './pgsql'
 export * from './query'
@@ -13,12 +13,12 @@ export * from './query'
 const HOUR_SCHEDULER = '0 */1 * * *'
 const log = getAppLogger('service')
 
-async function positionUpdate(conn: Connection) {
+async function positionUpdate() {
     log.info(`update position`)
     const stream = userRd.scanStream({
         match: `H_User_*`
     })
-    const rep = conn.getRepository(LendingPosition)
+    const rep = await getConnection().getRepository(LendingPosition)
 
     // fetch all accounts in market
     stream.on('data', (keys: string[]) => {
@@ -56,16 +56,16 @@ async function positionUpdate(conn: Connection) {
 }
 
 export default class Service {
-    static async run(conn: Connection) {
-        
+    static async run() {
+
         await RedisService.initAssetCache()
 
         const lastBlock = await RedisService.getLastBlock()
 
-        lendingScanner(process.env.SUBQUERY_ENDPOINT!, lastBlock, conn)
+        lendingScanner(process.env.SUBQUERY_ENDPOINT!, lastBlock)
 
         const positionHourlyJob = She.scheduleJob(HOUR_SCHEDULER, () => {
-            positionUpdate(conn)
+            positionUpdate()
         })
 
         positionHourlyJob.invoke()

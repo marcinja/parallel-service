@@ -33,5 +33,5 @@ app.listen('4321', async () => {
     const conn = await initDB()
     await ApiService.init(process.env.SUBSTRATE_ENDPOINT!)
 
-    Service.run(conn)
+    Service.run()
 })

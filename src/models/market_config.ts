@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, Column, PrimaryColumn } from "typeorm";
+import { BaseEntity, Entity, Column, PrimaryColumn, Index } from "typeorm";
 
 @Entity({ name: "lending_market_config"})
 export class LendingMarketConfigure extends BaseEntity {
@@ -29,6 +29,7 @@ export class LendingMarketConfigure extends BaseEntity {
     @Column()
     borrow_enabled!: boolean    // market active
 
+    @Index()
     @Column()
     block_number!: number
 

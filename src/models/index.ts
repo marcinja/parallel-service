@@ -26,6 +26,7 @@ export async function initDB(): Promise<Connection> {
             LendingMarketConfigure,
             LendingAssetConfigure
         ],
-        synchronize: true
+        synchronize: true,
+        logger: "debug"
     })
 }

@@ -1,4 +1,4 @@
-import { Entity, Column, BaseEntity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, BaseEntity, PrimaryColumn, PrimaryGeneratedColumn, Index } from "typeorm";
 
 @Entity({ name: "lending_action"})
 export class LendingAction extends BaseEntity {
@@ -29,6 +29,7 @@ export class LendingAction extends BaseEntity {
     @Column()
     exchange_rate!: string
 
+    @Index()
     @Column()
     block_number!: number
 

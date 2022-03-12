@@ -1,5 +1,5 @@
 import { gql, request } from 'graphql-request'
-import { Connection } from 'typeorm';
+import { getConnection } from 'typeorm';
 import { getAppLogger, dayFromUtcTimestamp, sleeps } from '../libs'
 import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../models';
 import { addNewAction } from './pgsql';
@@ -86,7 +86,7 @@ type AssetConfigNode = {
     timestamp: string
 }
 
-async function actionHandler(conn: Connection, nodes: ActionNode[]) {
+async function actionHandler(nodes: ActionNode[]) {
     try {
         nodes.forEach(async node => {
             const token = await RedisService.getToken(node.assetId)
@@ -105,7 +105,7 @@ async function actionHandler(conn: Connection, nodes: ActionNode[]) {
                 block_timestamp: node.timestamp
             } as LendingAction)
 
-            positionHandler(conn, node)
+            positionHandler(node)
 
         })
     } catch (e: any) {
@@ -113,7 +113,7 @@ async function actionHandler(conn: Connection, nodes: ActionNode[]) {
     }
 }
 
-async function positionHandler(conn: Connection, node: ActionNode) {
+async function positionHandler(node: ActionNode) {
     // add or update new position data according to action
     // update account & asset info to redis cache
 
@@ -121,7 +121,7 @@ async function positionHandler(conn: Connection, node: ActionNode) {
         const token = await RedisService.getToken(node.assetId)
         const day = dayFromUtcTimestamp(node.timestamp)
 
-        await conn.getRepository(LendingPosition).save({
+        await getConnection().getRepository(LendingPosition).save({
             id: `${node.address}-${node.assetId}-${day}`,
             address: node.address,
             token,
@@ -140,14 +140,14 @@ async function positionHandler(conn: Connection, node: ActionNode) {
     }
 }
 
-async function marketHandler(conn: Connection, nodes: MarketConfigNode[]) {
+async function marketHandler(nodes: MarketConfigNode[]) {
     try {
         nodes.forEach(async node => {
             const token = await RedisService.getToken(node.assetId)
             const decimals = await RedisService.getDecimals(node.assetId)
 
             const day = dayFromUtcTimestamp(node.timestamp)
-            conn.getRepository(LendingMarketConfigure)
+            await getConnection().getRepository(LendingMarketConfigure)
                 .save({
                     id: `${node.assetId}-${day}`,
                     symbol: token,
@@ -168,11 +168,12 @@ async function marketHandler(conn: Connection, nodes: MarketConfigNode[]) {
     }
 }
 
-async function assetHandler(conn: Connection, nodes: AssetConfigNode[]) {
+async function assetHandler(nodes: AssetConfigNode[]) {
     try {
-        nodes.forEach(async node => {
+        for (let node of nodes) {
             const day = dayFromUtcTimestamp(node.timestamp)
-            conn.getRepository(LendingAssetConfigure)
+            await getConnection()
+                .getRepository(LendingAssetConfigure)
                 .save({
                     id: `${node.assetId}-${day}`,
                     block_number: node.blockHeight,
@@ -188,13 +189,13 @@ async function assetHandler(conn: Connection, nodes: AssetConfigNode[]) {
                     last_accrued_timestamp: node.lastAccruedTimestamp,
                     block_timestamp: node.timestamp
                 } as LendingAssetConfigure)
-        })
+        }
     } catch (e: any) {
         log.error(`handle asset configure error: %o`, e)
     }
 }
 
-export async function lendingScanner(endpoint: string, block: number, conn: Connection) {
+export async function lendingScanner(endpoint: string, block: number) {
     let { lastProcessedHeight } = await lastProcessedData(endpoint);
     log.info(`lending scanner run at[${block}], current lastProcessedHeight: ${lastProcessedHeight}`);
     while (true) {
@@ -286,9 +287,9 @@ export async function lendingScanner(endpoint: string, block: number, conn: Conn
             const assetNodes = lendingAssetConfigures.nodes
 
             await Promise.all([
-                actionHandler(conn, actionNodes),
-                marketHandler(conn, marketNodes),
-                assetHandler(conn, assetNodes)
+                actionHandler(actionNodes),
+                marketHandler(marketNodes),
+                assetHandler(assetNodes)
             ])
 
 
