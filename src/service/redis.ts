@@ -64,8 +64,8 @@ export class RedisService {
     static async getLastBlock(): Promise<number> {
         const block = await cacheRd.get(KEYS.Cache.lastBlock())
         if (block === null) {
-            log.error(`last block cache should be initialized`)
-            throw(`last block cache should be initialized`)
+            log.warn(`last block cache should be initialized`)
+            return 1
         }
         return Number(block)
     }
