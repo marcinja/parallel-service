@@ -8,7 +8,7 @@ export async function getAllAssets(ctx: Context, next: any) {
     const { assetId } = ctx.request.query
 
     if (!isValidInteger(assetId as string)) {
-        throw Resp.Fail(Code.Pro_Err, 'invalid asset id' as Msg)
+        throw Resp.Fail(Code.InvalidParam, Msg.InvalidParam)
     }
 
     const findOptions: FindOneOptions = {

@@ -10,6 +10,9 @@ export enum Code {
     Pro_Err = 1001,
 
     Auth_Fail = 1002,
+
+    // 2000 - 2999
+    InvalidParam = 2001
 }
 
 export enum Msg {
@@ -18,4 +21,6 @@ export enum Msg {
     Whocare = 'dont care',
 
     Auth_Fail = 'authority invalid',
+
+    InvalidParam = 'invalid parameters'
 }
