@@ -1,4 +1,4 @@
-import { getAppLogger } from "./log"
+import { getAppLogger } from './log'
 
 const log = getAppLogger('Unexpect')
 
@@ -7,7 +7,7 @@ const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2']
 
 export function unexpectListener(): void {
     log.debug('unexcept listener start')
-    errorTypes.map(type => {
+    errorTypes.map((type) => {
         process.on(type, async (err) => {
             try {
                 log.error(`process on ${type}: %o`, err)
@@ -18,7 +18,7 @@ export function unexpectListener(): void {
             }
         })
     })
-    
+
     signalTraps.map((type: any) => {
         process.once(type, async (err) => {
             try {

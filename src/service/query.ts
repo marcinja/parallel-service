@@ -11,19 +11,19 @@ function bigIntStr(hex: string): string {
 }
 
 export type PositionData = {
-    borrowBalance: string,
+    borrowBalance: string
     borrowIndex: string
-    supplyBalance: string,
-    totalEarnedPrior: number,
-    exchangeRatePrior: string,
+    supplyBalance: string
+    totalEarnedPrior: number
+    exchangeRatePrior: string
     exchangeRate: string
 }
 
 type AssetMeta = {
-    deposit: number,
-    name: string,
-    symbol: string,
-    decimals: number,
+    deposit: number
+    name: string
+    symbol: string
+    decimals: number
     isFrozen: boolean
 }
 
@@ -34,10 +34,10 @@ export class ApiService {
         const api = await ApiPromise.create(
             options({
                 types: {
-                    TAssetBalance: 'Balance'
+                    TAssetBalance: 'Balance',
                 },
                 typesBundle,
-                provider: new WsProvider(endpoint)
+                provider: new WsProvider(endpoint),
             })
         )
         this.api = api
@@ -55,7 +55,7 @@ export class ApiService {
             })
         } catch (e: any) {
             log.error(`fetch asset list error: %o`, e)
-            throw('fetch asset id list error')
+            throw 'fetch asset id list error'
         }
     }
 
@@ -110,29 +110,26 @@ export class ApiService {
         const blockTimestamp = Number((await (await this.api.at(curBlockHash)).query.timestamp.now()).toHex())
         const timestamp = toUtcTimestamp(blockTimestamp)
 
-        log.debug(`handle account position meta: block[${curBlock}]-blockHash[${curBlockHash}]-${blockTimestamp}-${timestamp}`)
+        log.debug(
+            `handle account position meta: block[${curBlock}]-blockHash[${curBlockHash}]-${blockTimestamp}-${timestamp}`
+        )
 
         const re: any = await Promise.all([
             this.getAccountBorrows(assetId, address, curBlockHash),
             this.getBorrowIndex(assetId, curBlockHash),
             this.getAccountDeposits(assetId, address, curBlockHash),
             this.getAccountEarned(assetId, address, curBlockHash),
-            this.getExchangeRate(assetId, curBlockHash)
+            this.getExchangeRate(assetId, curBlockHash),
         ])
-        const [
-            borrows,
-            borrowIndex,
-            supplys,
-            totalEarned,
-            exchangeRate
-        ] = re
+        const [borrows, borrowIndex, supplys, totalEarned, exchangeRate] = re
         let borrowBalance = '0'
         const isZero = borrows.principal != 0
         if (isZero) {
             borrowBalance = new BigNumber(borrowIndex)
                 .dividedBy(new BigNumber(borrows.borrowIndex))
                 .multipliedBy(new BigNumber(borrows.principal))
-                .integerValue().toString()
+                .integerValue()
+                .toString()
             log.warn(`borrows princal not zero: get borrow balance: ${borrowBalance}`)
         }
 
@@ -145,7 +142,7 @@ export class ApiService {
             exchangeRatePrior: bigIntStr(totalEarned.exchangeRatePrior),
             exchangeRate,
             blockNumber: curBlock,
-            blockTimestamp: timestamp
+            blockTimestamp: timestamp,
         }
         return result
     }

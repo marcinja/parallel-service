@@ -1,7 +1,6 @@
-import Router from "koa-router"
-import { getAllMarkets, getLatestMarketBySymbol, getLatestMarkets } from "../controller"
+import Router from 'koa-router'
+import { getAllMarkets, getLatestMarketBySymbol, getLatestMarkets } from '../controller'
 const R = new Router()
-
 
 /**
  * @apiDefine Success
@@ -22,12 +21,12 @@ const R = new Router()
 /**
  * @apiDefine Error
  * @apiErrorExample {json} error
-* {
+ * {
  *  code: 1001,
  *  msg: 'invalid parameter',
  *  data: {}
  * }
- * 
+ *
  */
 
 /**

@@ -7,11 +7,11 @@ console.info('node env in log library: ', process.env.NODE_ENV)
 
 const { combine, colorize, timestamp, label, printf, json, splat } = format
 
-const printFormat = printf(msg => `${msg.timestamp} ${msg.label} ${msg.level}: ${msg.message}`)
+const printFormat = printf((msg) => `${msg.timestamp} ${msg.label} ${msg.level}: ${msg.message}`)
 const logFormat = (labelStr?: string, isJson: boolean = false) => {
     const common = combine(
         timestamp({
-            format: 'YYYY-MM-DD HH:mm:ss'   // make sure localtime
+            format: 'YYYY-MM-DD HH:mm:ss', // make sure localtime
         }),
         timestamp(),
         label({ label: labelStr ?? '' }),
@@ -38,11 +38,11 @@ function newRotateFile(filename: string, level: string = 'info', isJson: boolean
 function consoleLog(label: string, consoleLevel: string) {
     return new transports.Console({
         level: consoleLevel,
-        format: combine(colorize(), logFormat(label, false))
+        format: combine(colorize(), logFormat(label, false)),
     })
 }
 
-export function getAppLogger(label: string = '', opt?: { isJson: boolean, consoleLevel: string }) {
+export function getAppLogger(label: string = '', opt?: { isJson: boolean; consoleLevel: string }) {
     const isJson = opt?.isJson ?? true
     const consoleLevel = opt?.consoleLevel ?? 'debug'
     const format = logFormat(label, isJson)
@@ -54,15 +54,12 @@ export function getAppLogger(label: string = '', opt?: { isJson: boolean, consol
     return createLogger({
         format,
         transports: trans,
-        exceptionHandlers: [
-            newRotateFile('exception', 'error', false)
-        ],
-        exitOnError: false
+        exceptionHandlers: [newRotateFile('exception', 'error', false)],
+        exitOnError: false,
     })
 }
 
 export function accessLogger() {
-
     let trans: any[] = [newRotateFile('access', 'http')]
     console.info('node env in log library: ', process.env.NODE_ENV)
     if (process.env.NODE_ENV === 'dev') {
@@ -71,9 +68,7 @@ export function accessLogger() {
     return createLogger({
         format: logFormat('access', false),
         transports: trans,
-        exceptionHandlers: [
-            newRotateFile('access-exception', 'error')
-        ],
-        exitOnError: false
+        exceptionHandlers: [newRotateFile('access-exception', 'error')],
+        exitOnError: false,
     })
 }

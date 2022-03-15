@@ -1,8 +1,6 @@
+import { BaseEntity, Entity, Column, PrimaryColumn, Index } from 'typeorm'
 
-
-import { BaseEntity, Entity, Column, PrimaryColumn, Index } from "typeorm";
-
-@Entity({name: "lending_position"})
+@Entity({ name: 'lending_position' })
 export class LendingPosition extends BaseEntity {
     @PrimaryColumn()
     id!: string
@@ -26,6 +24,6 @@ export class LendingPosition extends BaseEntity {
     @Column()
     block_number!: number
 
-    @Column({ type: 'timestamptz'})
+    @Column({ type: 'timestamptz' })
     block_timestamp!: string
 }

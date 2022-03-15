@@ -6,15 +6,15 @@ export enum DBT {
 }
 
 export interface RArgT {
-    port?: number,
-    host?: string,
+    port?: number
+    host?: string
     options?: RedisOptions
 }
 
 export type RdT = IORedis.Redis
 
 export interface RClientT {
-    client: RdT,
+    client: RdT
     db: DBT
 }
 
@@ -24,11 +24,12 @@ export class Redis {
 
     constructor(db: DBT, arg?: RArgT) {
         const options: RedisOptions = {
-            ...arg?.options, db,
+            ...arg?.options,
+            db,
             retryStrategy(times) {
                 const delay = Math.min(times * 50, 2000)
                 return delay
-            }
+            },
         }
         this.client = new IORedis(arg?.port, arg?.host, options)
         this.db = db
@@ -43,7 +44,9 @@ export class Redis {
     }
 
     onConnect(cb?: () => void) {
-        this.client.once('connect', () => { cb && cb() })
+        this.client.once('connect', () => {
+            cb && cb()
+        })
     }
 
     onError(cb?: (err: any) => void) {
@@ -90,7 +93,7 @@ export class RedisPool {
 namespace User {
     const U = 'User'
     export const hUser = (address: string): string => {
-        return `H_User_${address}`
+        return `H_${U}_${address}`
     }
 }
 
@@ -98,20 +101,19 @@ namespace Cache {
     const C = 'Cache'
 
     export const hToken = (): string => {
-        return `H_Cache_token`
+        return `H_${C}_token`
     }
 
     export const hDecimals = (): string => {
-        return `H_Cache_decimals`
+        return `H_${C}_decimals`
     }
 
     export const lastBlock = (): string => {
-        return `Cache_last_block`
+        return `${C}_last_block`
     }
 }
 
-
 export const KEYS = {
     User,
-    Cache
+    Cache,
 }

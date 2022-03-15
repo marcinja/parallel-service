@@ -1,9 +1,7 @@
-import { Context } from "koa"
-import { Between, FindOneOptions, LessThanOrEqual, MoreThan } from "typeorm"
-import { getAppLogger, Resp, parsePagenation, isValidInteger } from "../libs"
-import { LendingAction } from "../models"
-
-const log = getAppLogger('Controller-action')
+import { Context } from 'koa'
+import { Between, FindOneOptions, LessThanOrEqual, MoreThan } from 'typeorm'
+import { Resp, parsePagenation, isValidInteger } from '../libs'
+import { LendingAction } from '../models'
 
 export async function getActionList(ctx: Context, next: any) {
     const { pageIndex, pageSize, skip } = parsePagenation(ctx)
@@ -11,19 +9,19 @@ export async function getActionList(ctx: Context, next: any) {
     const findOptions: FindOneOptions = {
         order: {
             address: 'ASC',
-            block_number: 'ASC'
-        }
+            block_number: 'ASC',
+        },
     }
     if (address) {
         findOptions.where = {
-            address
+            address,
         }
     }
 
     if (symbol) {
         findOptions.where = {
             ...findOptions.where,
-            token: symbol
+            token: symbol,
         }
     }
 
@@ -33,23 +31,23 @@ export async function getActionList(ctx: Context, next: any) {
     let blockOperator
     if (hasStart && !hasEnd) {
         blockOperator = MoreThan(Number(startBlock))
-    } else if(!hasStart && hasEnd) {
+    } else if (!hasStart && hasEnd) {
         blockOperator = LessThanOrEqual(endBlock)
-    } else if(hasStart && hasEnd) {
+    } else if (hasStart && hasEnd) {
         blockOperator = Between(startBlock, endBlock)
     }
 
     if (byBlock) {
         findOptions.where = {
             ...findOptions.where,
-            block_number: blockOperator
+            block_number: blockOperator,
         }
     }
 
     const [list, totalSize] = await LendingAction.findAndCount({
         ...findOptions,
         take: pageSize,
-        skip
+        skip,
     })
     const pageCount = Math.floor(totalSize / pageSize) + 1
     ctx.body = Resp.Ok({
@@ -57,7 +55,7 @@ export async function getActionList(ctx: Context, next: any) {
         pageSize,
         totalSize,
         pageCount,
-        list
+        list,
     })
     return next
 }

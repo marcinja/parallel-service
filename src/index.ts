@@ -18,19 +18,17 @@ router.use('/market', marketRouter)
 router.use('/position', positionRouter)
 router.use('/asset', assetRouter)
 
-app
-    .use(accessMidware)
+app.use(accessMidware)
     .use(KoaBody({ json: true }))
     .use(responseTime)
     .use(errHanldle)
     .use(accessControl)
     .use(router.routes())
 
-
 unexpectListener()
 app.listen('4321', async () => {
     log.info('app listen on 4321')
-    const conn = await initDB()
+    await initDB()
     await ApiService.init(process.env.SUBSTRATE_ENDPOINT!)
 
     Service.run()

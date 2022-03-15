@@ -8,11 +8,7 @@ export class Resp {
     }
 
     static Ok = (data: any = {}) => {
-        return new Resp(
-            Code.Ok,
-            Msg.Ok,
-            data
-        )
+        return new Resp(Code.Ok, Msg.Ok, data)
     }
 
     static Fail = (code: Code, msg: Msg, data: any = {}) => {

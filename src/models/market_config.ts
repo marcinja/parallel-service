@@ -1,6 +1,6 @@
-import { BaseEntity, Entity, Column, PrimaryColumn, Index } from "typeorm";
+import { BaseEntity, Entity, Column, PrimaryColumn, Index } from 'typeorm'
 
-@Entity({ name: "lending_market_config"})
+@Entity({ name: 'lending_market_config' })
 export class LendingMarketConfigure extends BaseEntity {
     @PrimaryColumn()
     id!: string
@@ -27,12 +27,12 @@ export class LendingMarketConfigure extends BaseEntity {
     decimals!: number
 
     @Column()
-    borrow_enabled!: boolean    // market active
+    borrow_enabled!: boolean // market active
 
     @Index()
     @Column()
     block_number!: number
 
-    @Column({ type: 'timestamptz'})
+    @Column({ type: 'timestamptz' })
     block_timestamp!: string
 }

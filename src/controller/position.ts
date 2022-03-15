@@ -1,9 +1,7 @@
-import { Context } from "koa"
-import { FindOneOptions, Like } from "typeorm"
-import { getAppLogger, Resp, parsePagenation, todayTimestamp } from "../libs";
-import { LendingPosition } from "../models";
-
-const log = getAppLogger('Controller-position')
+import { Context } from 'koa'
+import { FindOneOptions, Like } from 'typeorm'
+import { Resp, parsePagenation, todayTimestamp } from '../libs'
+import { LendingPosition } from '../models'
 
 export async function getPositionList(ctx: Context, next: any) {
     const { pageIndex, pageSize, skip } = parsePagenation(ctx)
@@ -11,25 +9,25 @@ export async function getPositionList(ctx: Context, next: any) {
     const findOptions: FindOneOptions = {
         order: {
             address: 'ASC',
-            block_number: 'ASC'
-        }
+            block_number: 'ASC',
+        },
     }
     if (address) {
         findOptions.where = {
-            address
+            address,
         }
     }
 
     if (symbol) {
         findOptions.where = {
             ...findOptions.where,
-            token: symbol
+            token: symbol,
         }
     }
     const [list, totalSize] = await LendingPosition.findAndCount({
         ...findOptions,
         take: pageSize,
-        skip
+        skip,
     })
     const pageCount = Math.floor(totalSize / pageSize) + 1
 
@@ -38,7 +36,7 @@ export async function getPositionList(ctx: Context, next: any) {
         pageSize,
         pageCount,
         totalSize,
-        list
+        list,
     })
     return next
 }
@@ -48,23 +46,23 @@ export async function getLatestPositions(ctx: Context, next: any) {
     const { address, symbol } = ctx.request.query
     const findOptions: FindOneOptions = {
         where: {
-            id: Like(`%-${today}`)
+            id: Like(`%-${today}`),
         },
         order: {
             address: 'ASC',
-        }
+        },
     }
     if (address) {
         findOptions.where = {
             ...findOptions.where,
-            address
+            address,
         }
     }
 
     if (symbol) {
         findOptions.where = {
             ...findOptions.where,
-            token: symbol
+            token: symbol,
         }
     }
     const re = await LendingPosition.find(findOptions)

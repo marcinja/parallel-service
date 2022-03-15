@@ -14,8 +14,8 @@ const userRedis = new Redis(DBT.User, {
     port,
     options: {
         password,
-        username
-    }
+        username,
+    },
 })
 
 const cacheRedis = new Redis(DBT.Cache, {
@@ -23,8 +23,8 @@ const cacheRedis = new Redis(DBT.Cache, {
     port,
     options: {
         password,
-        username
-    }
+        username,
+    },
 })
 
 userRedis.onError((err: string) => {
@@ -49,15 +49,11 @@ export const userRd = userRedis.getClient()
 const cacheRd = cacheRedis.getClient()
 
 export class RedisService {
-
     static async initAssetCache() {
         const assetIds = await ApiService.getAssets()
         for (let assetId of assetIds) {
             const meta = await ApiService.getAssetMeta(assetId)
-            await Promise.all([
-                this.setToken(assetId, meta.symbol),
-                this.setDecimals(assetId, meta.decimals)
-            ])
+            await Promise.all([this.setToken(assetId, meta.symbol), this.setDecimals(assetId, meta.decimals)])
         }
     }
 
@@ -82,7 +78,7 @@ export class RedisService {
         const token = await cacheRd.hget(KEYS.Cache.hToken(), assetId.toString())
         if (token === null) {
             log.error(`invalid asset id: ${assetId}`)
-            throw(`invalid asset id: ${assetId}`)
+            throw `invalid asset id: ${assetId}`
         }
         return token
     }
@@ -91,12 +87,11 @@ export class RedisService {
         await cacheRd.hset(KEYS.Cache.hDecimals(), assetId.toString(), decimals)
     }
 
-
     static async getDecimals(assetId: number): Promise<number> {
         const decimals = await cacheRd.hget(KEYS.Cache.hDecimals(), assetId.toString())
         if (decimals === null) {
             log.error(`invalid assetId: ${assetId}`)
-            throw(`invalid assetId: ${assetId}`)
+            throw `invalid assetId: ${assetId}`
         }
         return Number(decimals)
     }

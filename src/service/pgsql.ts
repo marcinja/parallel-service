@@ -20,7 +20,7 @@ export async function isActionExisted(hash: string) {
     const action = await LendingAction.findOne({
         where: {
             id: hash,
-        }
+        },
     })
     return action !== undefined
 }

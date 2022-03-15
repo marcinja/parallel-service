@@ -13,20 +13,15 @@ const ENV = process.env
 
 export async function initDB(): Promise<Connection> {
     return await createConnection({
-        type: "postgres",
+        type: 'postgres',
         // url: process.env.DATABASE_URL as string,
         host: ENV.PG_DB_HOST,
         port: Number(ENV.PG_DB_PORT),
         username: ENV.PG_DB_USER,
         password: ENV.PG_DB_PASSWORD,
         database: ENV.PG_DB_NAME,
-        entities: [
-            LendingAction,
-            LendingPosition,
-            LendingMarketConfigure,
-            LendingAssetConfigure
-        ],
+        entities: [LendingAction, LendingPosition, LendingMarketConfigure, LendingAssetConfigure],
         synchronize: true,
-        logger: "debug"
+        logger: 'debug',
     })
 }

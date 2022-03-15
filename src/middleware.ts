@@ -1,5 +1,5 @@
 import { Context } from 'koa'
-import { accessLogger , Resp, Code, Msg } from './libs'
+import { accessLogger, Resp, Code, Msg } from './libs'
 
 type KCtxT = any
 type NextT = () => Promise<any>
@@ -11,7 +11,12 @@ export const responseTime = async (ctx: KCtxT, next: NextT) => {
     // const endT = Symbol.for('request-received.startTime')
     let start = ctx[startT] ? ctx[startT].getTime() : Date.now()
     await next()
-    log.info(`${ctx.method} ${ctx.originalUrl} %o ${ctx.response.status || 404} ${ctx.response.length} byte ${(Date.now() - start)}ms`, ctx.request.body)
+    log.info(
+        `${ctx.method} ${ctx.originalUrl} %o ${ctx.response.status || 404} ${ctx.response.length} byte ${
+            Date.now() - start
+        }ms`,
+        ctx.request.body
+    )
 }
 
 export const authCheck = async (ctx: KCtxT, next: NextT) => {

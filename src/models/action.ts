@@ -1,9 +1,9 @@
-import { Entity, Column, BaseEntity, PrimaryColumn, PrimaryGeneratedColumn, Index } from "typeorm";
+import { Entity, Column, BaseEntity, PrimaryColumn, Index } from 'typeorm'
 
-@Entity({ name: "lending_action"})
+@Entity({ name: 'lending_action' })
 export class LendingAction extends BaseEntity {
     @PrimaryColumn()
-    id!: string     // tx hash
+    id!: string // tx hash
 
     @Column()
     address!: string
@@ -33,6 +33,6 @@ export class LendingAction extends BaseEntity {
     @Column()
     block_number!: number
 
-    @Column({type: 'timestamptz'})
+    @Column({ type: 'timestamptz' })
     block_timestamp!: string
 }

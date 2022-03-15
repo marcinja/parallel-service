@@ -1,97 +1,82 @@
 import { gql, request } from 'graphql-request'
-import { getConnection } from 'typeorm';
+import { getConnection } from 'typeorm'
 import { getAppLogger, dayFromUtcTimestamp, sleeps } from '../libs'
-import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../models';
-import { addNewAction } from './pgsql';
-import { RedisService } from './redis';
+import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../models'
+import { addNewAction } from './pgsql'
+import { RedisService } from './redis'
 
-const log = getAppLogger("service-subql");
+const log = getAppLogger('service-subql')
 
 type SubqlMeta = {
     lastProcessedHeight: number
     lastProcessedTimestamp: string
-};
+}
 
 export async function lastProcessedData(url: string): Promise<SubqlMeta> {
     const { _metadata } = await request(
         url,
         gql`
-      query {
-        _metadata {
-          lastProcessedHeight
-          lastProcessedTimestamp
-        }
-      }
-    `
-    );
-    return _metadata;
+            query {
+                _metadata {
+                    lastProcessedHeight
+                    lastProcessedTimestamp
+                }
+            }
+        `
+    )
+    return _metadata
 }
 
 type ActionNode = {
-    id: string,
-    blockHeight: number,
-    address: string,
-    method: string,
-    assetId: number,
-    value: string,
-    exchangeRate: string,
+    id: string
+    blockHeight: number
+    address: string
+    method: string
+    assetId: number
+    value: string
+    exchangeRate: string
     borrowIndex: string
-    supplyBalance: string,
-    borrowBalance: string,
-    timestamp: string,
-    totalEarnedPrior: number,
-    exchangeRatePrior: string,
-}
-
-type PositionNode = {
-    id: string,
-    blockHeight: number,
-    address: string,
-    assetId: number,
-    borrowIndex: string,
-    supplyBalance: string,
-    borrowBalance: string,
-    exchangeRate: string,
-    totalEarnedPrior: number,
-    exchangeRatePrior: string,
+    supplyBalance: string
+    borrowBalance: string
     timestamp: string
+    totalEarnedPrior: number
+    exchangeRatePrior: string
 }
 
 type MarketConfigNode = {
-    id: string,
-    blockHeight: number,
-    assetId: number,
-    collateralFactor: string,
-    closeFactor: string,
-    reserveFactor: string,
-    borrowCap: string,
-    liquidationIncentive: string,
-    marketStatus: string,
+    id: string
+    blockHeight: number
+    assetId: number
+    collateralFactor: string
+    closeFactor: string
+    reserveFactor: string
+    borrowCap: string
+    liquidationIncentive: string
+    marketStatus: string
     timestamp: string
 }
 
 type AssetConfigNode = {
-    id: string,
-    assetId: number,
-    blockHeight: number,
-    totalSupply: string,
-    totalBorrows: string,
-    totalReserves: string,
-    borrowIndex: string,
-    borrowRate: string,
-    supplyRate: string,
-    exchangeRate: string,
-    utilizationRatio: string,
-    lastAccruedTimestamp: string,
+    id: string
+    assetId: number
+    blockHeight: number
+    totalSupply: string
+    totalBorrows: string
+    totalReserves: string
+    borrowIndex: string
+    borrowRate: string
+    supplyRate: string
+    exchangeRate: string
+    utilizationRatio: string
+    lastAccruedTimestamp: string
     timestamp: string
 }
 
 async function actionHandler(nodes: ActionNode[]) {
     try {
-        nodes.forEach(async node => {
+        nodes.forEach(async (node) => {
             const token = await RedisService.getToken(node.assetId)
-            //
-            const re = await addNewAction({
+            await addNewAction({
                 id: node.id,
                 block_number: node.blockHeight,
                 address: node.address,
@@ -102,11 +87,10 @@ async function actionHandler(nodes: ActionNode[]) {
                 supply_balance: node.supplyBalance,
                 borrow_balance: node.borrowBalance,
                 borrow_index: node.borrowIndex,
-                block_timestamp: node.timestamp
+                block_timestamp: node.timestamp,
             } as LendingAction)
 
             positionHandler(node)
-
         })
     } catch (e: any) {
         log.error(`handle action nodes error: %o`, e)
@@ -121,20 +105,21 @@ async function positionHandler(node: ActionNode) {
         const token = await RedisService.getToken(node.assetId)
         const day = dayFromUtcTimestamp(node.timestamp)
 
-        await getConnection().getRepository(LendingPosition).save({
-            id: `${node.address}-${node.assetId}-${day}`,
-            address: node.address,
-            token,
-            supply_balance: node.supplyBalance,
-            borrow_balance: node.borrowBalance,
-            exchange_rate: node.exchangeRate,
-            block_number: node.blockHeight,
-            block_timestamp: node.timestamp
-        } as LendingPosition)
+        await getConnection()
+            .getRepository(LendingPosition)
+            .save({
+                id: `${node.address}-${node.assetId}-${day}`,
+                address: node.address,
+                token,
+                supply_balance: node.supplyBalance,
+                borrow_balance: node.borrowBalance,
+                exchange_rate: node.exchangeRate,
+                block_number: node.blockHeight,
+                block_timestamp: node.timestamp,
+            } as LendingPosition)
 
         // update cache
         await RedisService.updateAccount(node.address, node.assetId)
-
     } catch (e: any) {
         log.error(`handle position error: %o`, e)
     }
@@ -142,12 +127,13 @@ async function positionHandler(node: ActionNode) {
 
 async function marketHandler(nodes: MarketConfigNode[]) {
     try {
-        nodes.forEach(async node => {
+        nodes.forEach(async (node) => {
             const token = await RedisService.getToken(node.assetId)
             const decimals = await RedisService.getDecimals(node.assetId)
 
             const day = dayFromUtcTimestamp(node.timestamp)
-            await getConnection().getRepository(LendingMarketConfigure)
+            await getConnection()
+                .getRepository(LendingMarketConfigure)
                 .save({
                     id: `${node.assetId}-${day}`,
                     symbol: token,
@@ -159,10 +145,9 @@ async function marketHandler(nodes: MarketConfigNode[]) {
                     decimals,
                     borrow_enabled: node.marketStatus === 'Active',
                     block_number: node.blockHeight,
-                    block_timestamp: node.timestamp
+                    block_timestamp: node.timestamp,
                 } as LendingMarketConfigure)
         })
-
     } catch (e: any) {
         log.error(`handle market configure error: %o`, e)
     }
@@ -187,7 +172,7 @@ async function assetHandler(nodes: AssetConfigNode[]) {
                     exchange_rate: node.exchangeRate,
                     utilization_ratio: node.utilizationRatio,
                     last_accrued_timestamp: node.lastAccruedTimestamp,
-                    block_timestamp: node.timestamp
+                    block_timestamp: node.timestamp,
                 } as LendingAssetConfigure)
         }
     } catch (e: any) {
@@ -196,8 +181,8 @@ async function assetHandler(nodes: AssetConfigNode[]) {
 }
 
 export async function lendingScanner(endpoint: string, block: number) {
-    let { lastProcessedHeight } = await lastProcessedData(endpoint);
-    log.info(`lending scanner run at[${block}], current lastProcessedHeight: ${lastProcessedHeight}`);
+    let { lastProcessedHeight } = await lastProcessedData(endpoint)
+    log.info(`lending scanner run at[${block}], current lastProcessedHeight: ${lastProcessedHeight}`)
     while (true) {
         try {
             const res = await request(
@@ -276,36 +261,29 @@ export async function lendingScanner(endpoint: string, block: number) {
                       }
                   }
               }`
-            );
-            const { query: {
-                lendingActions,
-                lendingMarketConfigures,
-                lendingAssetConfigures,
-            } } = res
+            )
+            const {
+                query: { lendingActions, lendingMarketConfigures, lendingAssetConfigures },
+            } = res
             const actionNodes = lendingActions.nodes
             const marketNodes = lendingMarketConfigures.nodes
             const assetNodes = lendingAssetConfigures.nodes
 
-            await Promise.all([
-                actionHandler(actionNodes),
-                marketHandler(marketNodes),
-                assetHandler(assetNodes)
-            ])
-
+            await Promise.all([actionHandler(actionNodes), marketHandler(marketNodes), assetHandler(assetNodes)])
 
             // update scanner last block
-            const newBlock = block + 1;
+            const newBlock = block + 1
             await RedisService.updateLastBlock(newBlock)
 
             while (newBlock > lastProcessedHeight) {
                 // sleep 5s
-                await sleeps(5);
-                lastProcessedHeight = (await lastProcessedData(endpoint)).lastProcessedHeight;
+                await sleeps(5)
+                lastProcessedHeight = (await lastProcessedData(endpoint)).lastProcessedHeight
                 log.debug(`sleep for a while...fetch new lastProcessedHeight: ${lastProcessedHeight}`)
             }
-            block = newBlock;
+            block = newBlock
         } catch (e: any) {
-            log.error(`block scanner error: %o`, e);
+            log.error(`block scanner error: %o`, e)
         }
     }
 }

@@ -5,7 +5,7 @@ import { getAppLogger } from './log'
 const log = getAppLogger('util')
 
 export const sleeps = async (sec: number) => {
-    return new Promise((resolve, _reject) => {
+    return new Promise((resolve) => {
         const timer = setTimeout(() => {
             resolve(' enough sleep~')
             clearTimeout(timer)
@@ -17,7 +17,7 @@ export const delays = (sec: number, cb?: () => void) => {
     const timer = setTimeout(() => {
         cb && cb()
         clearTimeout(timer)
-    }, sec * 1000);
+    }, sec * 1000)
 }
 
 export const dayFromUtcTimestamp = (timestamp: string): number => {
@@ -25,7 +25,9 @@ export const dayFromUtcTimestamp = (timestamp: string): number => {
 }
 
 export const toUtcTimestamp = (time: number): string => {
-    return Mom.unix(time/1000).utc(true).toString()
+    return Mom.unix(time / 1000)
+        .utc(true)
+        .toString()
 }
 
 export const localToUtcTimestamp = (timestamp: string): number => {
@@ -39,8 +41,8 @@ export const todayTimestamp = (): number => {
 }
 
 type PageQuery = {
-    pageSize: number,
-    pageIndex: number,
+    pageSize: number
+    pageIndex: number
     skip: number
 }
 
@@ -54,7 +56,7 @@ export function parsePagenation(ctx: Context): PageQuery {
     return {
         pageIndex: index,
         pageSize: size,
-        skip
+        skip,
     }
 }
 
