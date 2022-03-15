@@ -5,14 +5,14 @@
     "author": "Parallel Finance Developer",
     "license": "Apache-2.0",
     "scripts": {
-        "build": "tsc",
+        "build": "rm -rf dist && tsc",
         "dev": "ts-node src/index.ts",
-        "start": "node dist/src/index.js",
         "test": "jest",
         "lint": "npx eslint src test --ext .js,.ts",
         "lint:fix": "npx eslint --fix src test --ext .js,.ts",
         "api": "npx apidoc -i src/routers -o doc/",
-        "doc": "npx apidoc-markdown -i src/routers -o api.md"
+        "doc": "npx apidoc-markdown -i src/routers -o api.md",
+        "start": "yarn build && node dist/src/index.js"
     },
     "dependencies": {
         "@parallel-finance/api": "^1.5.2",

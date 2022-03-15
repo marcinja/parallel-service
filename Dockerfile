@@ -1,13 +1,12 @@
-FROM node:16
-WORKDIR /usr/app
+FROM node:14.17.0
+WORKDIR /app
 
-COPY package*.json ./
+COPY package.json yarn.lock ./
 COPY tsconfig.json ./
-# RUN npm install -g yarn
 RUN yarn install
 RUN yarn build
 COPY ./dist .
 
 EXPOSE 4321
 
-CMD ["yarn", "start"]
+CMD ["node", "src/index.js"]
