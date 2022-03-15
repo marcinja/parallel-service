@@ -12,7 +12,7 @@ export enum Code {
     Auth_Fail = 1002,
 
     // 2000 - 2999
-    InvalidParam = 2001
+    InvalidParam = 2001,
 }
 
 export enum Msg {
@@ -22,5 +22,5 @@ export enum Msg {
 
     Auth_Fail = 'authority invalid',
 
-    InvalidParam = 'invalid parameters'
+    InvalidParam = 'invalid parameters',
 }
