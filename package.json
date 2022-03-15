@@ -6,7 +6,8 @@
     "license": "Apache-2.0",
     "scripts": {
         "build": "tsc",
-        "start": "ts-node src/index.ts",
+        "dev": "ts-node src/index.ts",
+        "start": "node dist/src/index.js",
         "test": "jest",
         "lint": "npx eslint src test --ext .js,.ts",
         "lint:fix": "npx eslint --fix src test --ext .js,.ts",
