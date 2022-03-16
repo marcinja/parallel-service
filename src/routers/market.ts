@@ -10,10 +10,50 @@ const R = new Router()
  *  msg: 'ok',
  *  data: {
  *      pageIndex: 1,
- *      pageSize: 20,
+ *      pageSize: 3,
  *      pageCount: 4,
- *      totalSize: 76,
- *      list: []
+ *      totalSize: 11,
+ *      list: [
+ *          {
+                "id": "1000-1646870400000",
+                "symbol": "XKSM",
+                "collateral_factor": "500000",
+                "borrow_cap": "100000000000000000",
+                "close_factor": "500000",
+                "liquidation_incentive": "1100000000000000000",
+                "reserve_factor": "150000",
+                "decimals": 12,
+                "borrow_enabled": true,
+                "block_number": 8954,
+                "block_timestamp": "2022-03-10T23:59:54.050Z"
+            },
+            {
+                "id": "1000-1646956800000",
+                "symbol": "XKSM",
+                "collateral_factor": "500000",
+                "borrow_cap": "100000000000000000",
+                "close_factor": "500000",
+                "liquidation_incentive": "1100000000000000000",
+                "reserve_factor": "150000",
+                "decimals": 12,
+                "borrow_enabled": true,
+                "block_number": 16047,
+                "block_timestamp": "2022-03-11T23:59:54.055Z"
+            },
+            {
+                "id": "100-1646870400000",
+                "symbol": "KSM",
+                "collateral_factor": "500000",
+                "borrow_cap": "100000000000000000",
+                "close_factor": "500000",
+                "liquidation_incentive": "1100000000000000000",
+                "reserve_factor": "150000",
+                "decimals": 12,
+                "borrow_enabled": true,
+                "block_number": 8954,
+                "block_timestamp": "2022-03-10T23:59:54.050Z"
+            }
+ *      ]
  *  }
  * }
  */

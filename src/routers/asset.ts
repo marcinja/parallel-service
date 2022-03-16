@@ -10,10 +10,41 @@ const R = new Router()
  *  msg: 'ok',
  *  data: {
  *      pageIndex: 1,
- *      pageSize: 20,
- *      pageCount: 4,
- *      totalSize: 76,
- *      list: []
+ *      pageSize: 2,
+ *      pageCount: 32,
+ *      totalSize: 32,
+ *      list: [
+ *          {
+                "id": "1000-1646870400000",
+                "block_number": 8954,
+                "asset_id": 1000,
+                "total_supply": "0",
+                "total_borrows": "0",
+                "total_reserves": "0",
+                "borrow_index": "1000065900190384317",
+                "borrow_rate": "20000000000000000",
+                "supply_rate": "0",
+                "exchange_rate": "20000000000000000",
+                "utilization_ratio": "0",
+                "last_accrued_timestamp": "1646956722",
+                "block_timestamp": "2022-03-10T23:59:54.05"
+            },
+            {
+                "id": "100-1646870400000",
+                "block_number": 8954,
+                "asset_id": 100,
+                "total_supply": "100000000000000000",
+                "total_borrows": "100004061162976",
+                "total_reserves": "609174224",
+                "borrow_index": "1000074022982853130",
+                "borrow_rate": "25000100000000000",
+                "supply_rate": "1062525500085000",
+                "exchange_rate": "20000037552285020",
+                "utilization_ratio": "50001",
+                "last_accrued_timestamp": "1646956722",
+                "block_timestamp": "2022-03-10T23:59:54.05"
+            }
+ *      ]
  *  }
  * }
  */
@@ -22,7 +53,7 @@ const R = new Router()
  * @apiDefine Error
  * @apiErrorExample {json} error
  * {
- *  code: 1001,
+ *  code: 2001,
  *  msg: 'invalid parameter',
  *  data: {}
  * }

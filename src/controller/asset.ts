@@ -7,10 +7,6 @@ export async function getAllAssets(ctx: Context, next: any) {
     const { pageIndex, pageSize, skip } = parsePagenation(ctx)
     const { assetId } = ctx.request.query
 
-    if (!isValidInteger(assetId as string)) {
-        throw Resp.Fail(Code.InvalidParam, Msg.InvalidParam)
-    }
-
     const findOptions: FindOneOptions = {
         order: {
             id: 'ASC',
@@ -18,6 +14,9 @@ export async function getAllAssets(ctx: Context, next: any) {
         },
     }
     if (assetId) {
+        if (!isValidInteger(assetId as string)) {
+            throw Resp.Fail(Code.InvalidParam, Msg.InvalidParam)
+        }
         findOptions.where = {
             asset_id: assetId,
         }

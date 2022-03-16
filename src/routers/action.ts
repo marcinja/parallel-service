@@ -13,7 +13,21 @@ const R = new Router()
  *      pageSize: 20,
  *      pageCount: 4,
  *      totalSize: 76,
- *      list: []
+ *      list: [
+ *          {
+                "id": "0x42d0025f6eeac09f51040646a6828767e5bba6867c4f0c928bb7e9eaedf950e1",
+                "address": "hJLQoRFTEnxkAz4m15N29btT5vvn6gLCzjm5dZYaVRPtrRZLK",
+                "token": "KSM",
+                "amount": "500000000000000",
+                "method": "Deposited",
+                "supply_balance": "50000000000000000",
+                "borrow_balance": "0",
+                "borrow_index": "1000032732650262113",
+                "exchange_rate": "20000000000000000",
+                "block_number": 4274,
+                "block_timestamp": "2022-03-10T08:12:54.046Z"
+            }
+ *      ]
  *  }
  * }
  */
@@ -22,7 +36,7 @@ const R = new Router()
  * @apiDefine Error
  * @apiErrorExample {json} error
  * {
- *  code: 1001,
+ *  code: 2001,
  *  msg: 'invalid parameter',
  *  data: {}
  * }
