@@ -16,7 +16,6 @@ env:
   PG_DB_PORT: 5432
   PG_DB_HOST: parallel-service-staging-v1.cmjwalrf1qza.us-east-2.rds.amazonaws.com
   PG_DB_USER: postgres
-  PG_DB_PASSWORD: PG_DB_PASSWORD_STAGING
   REDIS_HOST: parallel-service-staging-v1.xfcm5w.ng.0001.use2.cache.amazonaws.com
   REDIS_PORT: 6379
   SUBSTRATE_ENDPOINT: wss://regnet2-rpc.parallel.fi
@@ -62,8 +61,7 @@ jobs:
             PG_DB_USER=${{ env.PG_DB_USER }}
             PG_DB_NAME=${{ env.PG_DB_NAME }}
             PG_DB_PORT=${{ env.PG_DB_PORT }}
-            POSTGRES_DB_PASSWORD=${{ secrets.PG_DB_PASSWORD_STAGING}}
-            PRICE_URL=${{ env.PRICE_URL }}
+            PG_DB_PASSWORD=${{ secrets.PG_DB_PASSWORD_STAGING}}
             REDIS_HOST=${{ env.REDIS_HOST }}
             REDIS_PORT=${{ env.REDIS_PORT }}
             SUBSTRATE_ENDPOINT=${{ env.SUBSTRATE_ENDPOINT }}
