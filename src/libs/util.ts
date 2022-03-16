@@ -40,6 +40,10 @@ export const todayTimestamp = (): number => {
     return Mom().utc(true).startOf('day').valueOf()
 }
 
+export const now = (): number => {
+    return Mom().utc(true).valueOf()
+}
+
 type PageQuery = {
     pageSize: number
     pageIndex: number

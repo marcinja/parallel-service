@@ -108,8 +108,8 @@ namespace Cache {
         return `H_${C}_decimals`
     }
 
-    export const lastBlock = (): string => {
-        return `${C}_last_block`
+    export const hLastBlock = (): string => {
+        return `H_${C}_last_block`
     }
 }
 

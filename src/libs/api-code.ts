@@ -13,6 +13,8 @@ export enum Code {
 
     // 2000 - 2999
     InvalidParam = 2001,
+    SyncTimeout = 2002,
+    SubqlUnsync = 2003,
 }
 
 export enum Msg {
@@ -23,4 +25,6 @@ export enum Msg {
     Auth_Fail = 'authority invalid',
 
     InvalidParam = 'invalid parameters',
+    SyncTimeout = 'subquery sync timeout',
+    SubqlUnsync = 'subquery has not been synced',
 }

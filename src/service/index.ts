@@ -1,6 +1,6 @@
 import She from 'node-schedule'
 import { lendingScanner } from './subql'
-import { getAppLogger, todayTimestamp } from '../libs'
+import { getAppLogger, sleeps, todayTimestamp } from '../libs'
 import { RedisService, userRd } from './redis'
 import { ApiService } from './query'
 import { LendingPosition } from '../models'
@@ -55,7 +55,7 @@ export default class Service {
     static async run() {
         await RedisService.initAssetCache()
 
-        const lastBlock = await RedisService.getLastBlock()
+        const lastBlock = (await RedisService.getLastBlock())[0]
 
         lendingScanner(process.env.SUBQUERY_ENDPOINT!, lastBlock)
 

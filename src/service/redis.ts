@@ -1,5 +1,5 @@
 import Mom from 'moment'
-import { getAppLogger, Redis, DBT, KEYS } from '../libs'
+import { getAppLogger, Redis, DBT, KEYS, now } from '../libs'
 import { ApiService } from './query'
 
 const log = getAppLogger('redis')
@@ -57,17 +57,21 @@ export class RedisService {
         }
     }
 
-    static async getLastBlock(): Promise<number> {
-        const block = await cacheRd.get(KEYS.Cache.lastBlock())
-        if (block === null) {
+    static async getLastBlock(): Promise<number[]> {
+        const [block, updateAt] = await cacheRd.hvals(KEYS.Cache.hLastBlock())
+        if (block === undefined) {
             log.warn(`last block cache should be initialized`)
-            return 1
+            return [1, 0]
         }
-        return Number(block)
+        return [Number(block), Number(updateAt)]
     }
 
     static async updateLastBlock(block: number) {
-        return cacheRd.set(KEYS.Cache.lastBlock(), block)
+        const updateAt = now()
+        return cacheRd.hset(KEYS.Cache.hLastBlock(), {
+            block,
+            updateAt,
+        })
     }
 
     static async setToken(assetId: number, token: string) {

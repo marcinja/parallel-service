@@ -11,6 +11,8 @@ parallel lending service api doc
   - [GetAllAssets](#GetAllAssets)
   - [GetLatestAssetByAssetId](#GetLatestAssetByAssetId)
   - [GetLatestAssets](#GetLatestAssets)
+- [Health](#Health)
+  - [healthCheck](#healthCheck)
 - [Market](#Market)
   - [GetAllMarkets](#GetAllMarkets)
   - [GetLatestMarketBySymbol](#GetLatestMarketBySymbol)
@@ -219,6 +221,30 @@ GET /asset/latest/:assetId
 
 ```
 GET /asset/latest
+```
+
+# <a name='Health'></a> Health
+
+## <a name='healthCheck'></a> healthCheck
+[Back to top](#top)
+
+<p>get the service health status.</p>
+
+```
+GET /health
+```
+
+### Success response example
+
+#### Success response example - `success`
+
+```json
+{
+ code: 0,
+ msg: 'ok',
+ data: {
+     status: 'ok'
+ }
 ```
 
 # <a name='Market'></a> Market
