@@ -1,6 +1,6 @@
 import She from 'node-schedule'
 import { lendingScanner } from './subql'
-import { getAppLogger, sleeps, todayTimestamp } from '../libs'
+import { getAppLogger, todayTimestamp } from '../libs'
 import { RedisService, userRd } from './redis'
 import { ApiService } from './query'
 import { LendingPosition } from '../models'

@@ -104,6 +104,30 @@ export class ApiService {
         return bigIntStr((await ApiService.api.query.loans.borrowIndex(assetId)).toString())
     }
 
+    static async getLiquidityValue(assetId: number, blockHash?: string) {
+        if (blockHash)
+            return (
+                await ((await ApiService.api.at(blockHash)) as any).rpc.oracle.getValue('Aggregated', assetId)
+            ).toHuman()
+        return (await (ApiService.api as any).rpc.oracle.getValue('Aggregated', assetId)).toHuman()
+    }
+
+    static async getRawValue(assetId: number, blockHash?: string) {
+        if (blockHash)
+            return (
+                await ((await ApiService.api.at(blockHash)) as any).query.oracle.rawValues(
+                    'hJLQoRFTEnxkAz4m15N29btT5vvn6gLCzjm5dZYaVRPtrRZLK',
+                    assetId
+                )
+            ).toHuman()
+        return (
+            await (ApiService.api as any).query.oracle.rawValues(
+                'hJLQoRFTEnxkAz4m15N29btT5vvn6gLCzjm5dZYaVRPtrRZLK',
+                assetId
+            )
+        ).toHuman()
+    }
+
     static async getAccountLendingStorage(address: string, assetId: number) {
         const curBlock = Number((await this.api.query.system.number()).toHex())
         const curBlockHash = (await this.api.rpc.chain.getBlockHash(curBlock)).toString()
