@@ -52,5 +52,5 @@ Thumbs.db
 *.wmv
 
 .data
-.github
+# .github
 logs/
