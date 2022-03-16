@@ -1,0 +1,77 @@
+name: Staging deployment
+
+on: 
+  push: 
+    branches:
+        - main
+
+env:
+  AWS_REGION: us-east-2
+  ECR_REPOSITORY: parallel-service-v1-staging
+  ECS_CLUSTER: parallel-service-staging
+  ECS_SERVICE: parallel-service-staging-v1
+  ECS_TASK_DEFINITION: ./staging-task-definition.json
+  CONTAINER_NAME: parallel-service-staging-v1
+  PG_DB_NAME: parallel_service_dev
+  PG_DB_PORT: 5432
+  PG_DB_HOST: parallel-service-staging-v1.cmjwalrf1qza.us-east-2.rds.amazonaws.com
+  PG_DB_USER: postgres
+  PG_DB_PASSWORD: PG_DB_PASSWORD_STAGING
+  REDIS_HOST: parallel-service-staging-v1.xfcm5w.ng.0001.use2.cache.amazonaws.com
+  REDIS_PORT: 6379
+  SUBSTRATE_ENDPOINT: wss://regnet2-rpc.parallel.fi
+  SUBQUERY_ENDPOINT: https://api.subquery.network/sq/parallel-finance/parallel-lending-subql__cGFyY
+  
+
+jobs:
+  CICD:
+    name: deployment staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+          environment-variables: |
+            PG_DB_HOST=${{ env.PG_DB_HOST }}
+            PG_DB_USER=${{ env.PG_DB_USER }}
+            PG_DB_NAME=${{ env.PG_DB_NAME }}
+            PG_DB_PORT=${{ env.PG_DB_PORT }}
+            POSTGRES_DB_PASSWORD=${{ secrets.PG_DB_PASSWORD_STAGING}}
+            PRICE_URL=${{ env.PRICE_URL }}
+            REDIS_HOST=${{ env.REDIS_HOST }}
+            REDIS_PORT=${{ env.REDIS_PORT }}
+            SUBSTRATE_ENDPOINT=${{ env.SUBSTRATE_ENDPOINT }}
+            SUBQUERY_ENDPOINT=${{ env.SUBQUERY_ENDPOINT }}
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
