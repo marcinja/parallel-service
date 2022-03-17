@@ -8,7 +8,7 @@ env:
   ECR_REPOSITORY: parallel-service-v1-prd
   ECS_CLUSTER: parallel-service-prod
   ECS_SERVICE: parallel-service-prod-v1
-  ECS_TASK_DEFINITION: ./prodution-task-definition.json
+  ECS_TASK_DEFINITION: ./production-task-definition.json
   CONTAINER_NAME: parallel-service-v1-prd
   PG_DB_NAME: parallel_service_prd
   PG_DB_PORT: 5432
