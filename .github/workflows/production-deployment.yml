@@ -1,9 +1,7 @@
 name: Production deployment
 
-on: 
-  push: 
-    branches:
-        - main
+on: workflow_dispatch
+
 
 env:
   AWS_REGION: us-east-2
