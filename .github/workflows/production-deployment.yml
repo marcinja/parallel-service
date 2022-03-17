@@ -16,7 +16,7 @@ env:
   PG_DB_USER: postgres
   REDIS_HOST: parallel-service-prd-v1.xfcm5w.ng.0001.use2.cache.amazonaws.com
   REDIS_PORT: 6379
-  SUBSTRATE_ENDPOINT: wss://heiko-rpc.parallel.fi
+  SUBSTRATE_ENDPOINT: wss://parallel-heiko.api.onfinality.io/public-ws
   SUBQUERY_ENDPOINT:  https://api.subquery.network/sq/parallel-finance/parallel-lending-subql
   
 
