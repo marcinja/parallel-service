@@ -21,12 +21,12 @@ export const delays = (sec: number, cb?: () => void) => {
 }
 
 export const dayFromUtcTimestamp = (timestamp: string): number => {
-    return Mom(timestamp).utc(true).startOf('day').valueOf()
+    return Mom(timestamp).utc(false).startOf('day').valueOf()
 }
 
 export const toUtcTimestamp = (time: number): string => {
     return Mom.unix(time / 1000)
-        .utc(true)
+        .utc(false)
         .toString()
 }
 
@@ -37,11 +37,11 @@ export const localToUtcTimestamp = (timestamp: string): number => {
 }
 
 export const todayTimestamp = (): number => {
-    return Mom().utc(true).startOf('day').valueOf()
+    return Mom().utc(false).startOf('day').valueOf()
 }
 
 export const now = (): number => {
-    return Mom().utc(true).valueOf()
+    return Mom().utc(false).valueOf()
 }
 
 type PageQuery = {
