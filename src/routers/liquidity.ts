@@ -1,5 +1,5 @@
 import Router from 'koa-router'
-import { healthCheck } from '../controller'
+import { } from '../controller'
 const R = new Router()
 
 R.get('/')
