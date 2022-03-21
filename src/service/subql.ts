@@ -74,7 +74,11 @@ type AssetConfigNode = {
 
 async function actionHandler(nodes: ActionNode[]) {
     try {
-        nodes.forEach(async (node) => {
+        if (nodes.length < 1) {
+            log.debug(`empty action list`)
+            return
+        }
+        for (let node of nodes) {
             const token = await RedisService.getToken(node.assetId)
             await addNewAction({
                 id: node.id,
@@ -90,8 +94,8 @@ async function actionHandler(nodes: ActionNode[]) {
                 block_timestamp: node.timestamp,
             } as LendingAction)
 
-            positionHandler(node)
-        })
+            await positionHandler(node)
+        }
     } catch (e: any) {
         log.error(`handle action nodes error: %o`, e)
     }
@@ -127,7 +131,11 @@ async function positionHandler(node: ActionNode) {
 
 async function marketHandler(nodes: MarketConfigNode[]) {
     try {
-        nodes.forEach(async (node) => {
+        if (nodes.length < 1) {
+            log.debug(`empty market list`)
+            return
+        }
+        for (let node of nodes) {
             const token = await RedisService.getToken(node.assetId)
             const decimals = await RedisService.getDecimals(node.assetId)
 
@@ -147,7 +155,7 @@ async function marketHandler(nodes: MarketConfigNode[]) {
                     block_number: node.blockHeight,
                     block_timestamp: node.timestamp,
                 } as LendingMarketConfigure)
-        })
+        }
     } catch (e: any) {
         log.error(`handle market configure error: %o`, e)
     }
@@ -155,6 +163,10 @@ async function marketHandler(nodes: MarketConfigNode[]) {
 
 async function assetHandler(nodes: AssetConfigNode[]) {
     try {
+        if (nodes.length < 1) {
+            log.debug(`empty asset list`)
+            return
+        }
         for (let node of nodes) {
             const day = dayFromUtcTimestamp(node.timestamp)
             await getConnection()
@@ -185,6 +197,8 @@ export async function lendingScanner(endpoint: string, block: number) {
     log.info(`lending scanner run at[${block}], current lastProcessedHeight: ${lastProcessedHeight}`)
     while (true) {
         try {
+            const start = Date.now()
+            log.debug(`start to fetch new subquery data`)
             const res = await request(
                 endpoint,
                 gql`{
@@ -268,9 +282,9 @@ export async function lendingScanner(endpoint: string, block: number) {
             const actionNodes = lendingActions.nodes
             const marketNodes = lendingMarketConfigures.nodes
             const assetNodes = lendingAssetConfigures.nodes
-
+            log.debug(`fetch subquery time: ${Date.now() - start}`)
             await Promise.all([actionHandler(actionNodes), marketHandler(marketNodes), assetHandler(assetNodes)])
-
+            log.debug(`handle subquery fetch time: ${Date.now() - start}`)
             // update scanner last block
             const newBlock = block + 1
             await RedisService.updateLastBlock(newBlock)

@@ -1,8 +1,7 @@
-import { CONNREFUSED } from 'dns'
-import { Entity, Column, BaseEntity, PrimaryColumn, Index, OneToMany } from 'typeorm'
+import { Entity, Column, BaseEntity, PrimaryColumn, Index } from 'typeorm'
 
-@Entity({name: 'pool'})
-class Pool extends BaseEntity {
+@Entity({ name: 'pool' })
+export class Pool extends BaseEntity {
     @PrimaryColumn()
     id!: number
 

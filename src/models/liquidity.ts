@@ -1,8 +1,7 @@
-import { Entity, Column, BaseEntity, PrimaryColumn, Index } from 'typeorm'
+import { Entity, Column, BaseEntity, Index } from 'typeorm'
 
-@Entity({name: "liquidity"})
+@Entity({ name: 'liquidity' })
 export class Liquidity extends BaseEntity {
-
     @Index()
     @Column()
     block_number!: number

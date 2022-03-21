@@ -57,7 +57,7 @@ export default class Service {
 
         const lastBlock = (await RedisService.getLastBlock())[0]
 
-        lendingScanner(process.env.SUBQUERY_ENDPOINT!, lastBlock)
+        lendingScanner(process.env.SUBQUERY_LENDING_ENDPOINT!, lastBlock)
 
         const positionHourlyJob = She.scheduleJob(HOUR_SCHEDULER, () => {
             positionUpdate()
