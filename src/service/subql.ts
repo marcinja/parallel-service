@@ -6,6 +6,7 @@ import { addNewAction } from './pgsql'
 import { RedisService } from './redis'
 
 const log = getAppLogger('service-subql')
+const FETCH_BLOCK = 100
 
 type SubqlMeta = {
     lastProcessedHeight: number
@@ -80,6 +81,7 @@ async function actionHandler(nodes: ActionNode[]) {
         }
         for (let node of nodes) {
             const token = await RedisService.getToken(node.assetId)
+            log.debug(`add new action[${node.method}] of token[${token}]`)
             await addNewAction({
                 id: node.id,
                 block_number: node.blockHeight,
@@ -136,15 +138,17 @@ async function marketHandler(nodes: MarketConfigNode[]) {
             return
         }
         for (let node of nodes) {
-            const token = await RedisService.getToken(node.assetId)
+            const symbol = await RedisService.getToken(node.assetId)
             const decimals = await RedisService.getDecimals(node.assetId)
 
             const day = dayFromUtcTimestamp(node.timestamp)
+            log.debug(`add new market configure of token[${symbol}]`)
+
             await getConnection()
                 .getRepository(LendingMarketConfigure)
                 .save({
                     id: `${node.assetId}-${day}`,
-                    symbol: token,
+                    symbol,
                     collateral_factor: node.collateralFactor,
                     close_factor: node.closeFactor,
                     reserve_factor: node.reserveFactor,
@@ -169,12 +173,16 @@ async function assetHandler(nodes: AssetConfigNode[]) {
         }
         for (let node of nodes) {
             const day = dayFromUtcTimestamp(node.timestamp)
+            const symbol = await RedisService.getToken(node.assetId)
+            log.debug(`add new asset [${node.assetId}]-${symbol}`)
+
             await getConnection()
                 .getRepository(LendingAssetConfigure)
                 .save({
                     id: `${node.assetId}-${day}`,
                     block_number: node.blockHeight,
                     asset_id: node.assetId,
+                    symbol,
                     total_supply: node.totalSupply,
                     total_borrows: node.totalBorrows,
                     total_reserves: node.totalReserves,
@@ -207,7 +215,8 @@ export async function lendingScanner(endpoint: string, block: number) {
                           orderBy: BLOCK_HEIGHT_ASC,
                           filter: {
                               blockHeight: {
-                                  equalTo: ${block}
+                                  greaterThanOrEqualTo: ${block},
+                                  lessThan: ${block + FETCH_BLOCK}
                               }
                           }
                       ) {
@@ -232,7 +241,8 @@ export async function lendingScanner(endpoint: string, block: number) {
                         orderBy: BLOCK_HEIGHT_ASC,
                           filter: {
                               blockHeight: {
-                                  equalTo: ${block}
+                                  greaterThanOrEqualTo: ${block},
+                                  lessThan: ${block + FETCH_BLOCK}
                               }
                           }
                       ) {
@@ -253,7 +263,8 @@ export async function lendingScanner(endpoint: string, block: number) {
                         orderBy: BLOCK_HEIGHT_ASC,
                           filter: {
                               blockHeight: {
-                                  equalTo: ${block}
+                                  greaterThanOrEqualTo: ${block},
+                                  lessThan: ${block + FETCH_BLOCK}
                               }
                           }
                       ) {
@@ -286,7 +297,7 @@ export async function lendingScanner(endpoint: string, block: number) {
             await Promise.all([actionHandler(actionNodes), marketHandler(marketNodes), assetHandler(assetNodes)])
             log.debug(`handle subquery fetch time: ${Date.now() - start}`)
             // update scanner last block
-            const newBlock = block + 1
+            const newBlock = block + FETCH_BLOCK
             await RedisService.updateLastBlock(newBlock)
 
             while (newBlock > lastProcessedHeight) {

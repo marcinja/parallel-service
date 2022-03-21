@@ -13,6 +13,9 @@ export class LendingAssetConfigure extends BaseEntity {
     asset_id!: number
 
     @Column()
+    symbol!: string
+
+    @Column()
     total_supply!: string
 
     @Column()
