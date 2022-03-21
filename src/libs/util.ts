@@ -40,6 +40,16 @@ export const todayTimestamp = (): number => {
     return Mom().utc(false).startOf('day').valueOf()
 }
 
+export const startOfHour = (timeValue: string): number => {
+    const t = Mom.unix(Number(timeValue)).utc(false).startOf('hours')
+    log.debug(`start of timevalue in hour: ${t}`)
+    return t.valueOf()
+}
+
+export const getTimestamp = (timeValue: string): string => {
+    return Mom.unix(Number(timeValue)).utc(false).toString()
+}
+
 export const now = (): number => {
     return Mom().utc(false).valueOf()
 }

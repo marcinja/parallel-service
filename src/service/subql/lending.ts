@@ -1,32 +1,13 @@
 import { gql, request } from 'graphql-request'
 import { getConnection } from 'typeorm'
-import { getAppLogger, dayFromUtcTimestamp, sleeps } from '../libs'
-import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../models'
-import { addNewAction } from './pgsql'
-import { RedisService } from './redis'
+import { getAppLogger, dayFromUtcTimestamp, sleeps } from '../../libs'
+import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../../models'
+import { addNewAction } from '../pgsql'
+import { RedisService } from '../redis'
+import { lastProcessedData } from '.'
 
-const log = getAppLogger('service-subql')
-const FETCH_BLOCK = 100
-
-type SubqlMeta = {
-    lastProcessedHeight: number
-    lastProcessedTimestamp: string
-}
-
-export async function lastProcessedData(url: string): Promise<SubqlMeta> {
-    const { _metadata } = await request(
-        url,
-        gql`
-            query {
-                _metadata {
-                    lastProcessedHeight
-                    lastProcessedTimestamp
-                }
-            }
-        `
-    )
-    return _metadata
-}
+const log = getAppLogger('service-lending')
+const FETCH_BLOCK = 1
 
 type ActionNode = {
     id: string
@@ -75,10 +56,6 @@ type AssetConfigNode = {
 
 async function actionHandler(nodes: ActionNode[]) {
     try {
-        if (nodes.length < 1) {
-            log.debug(`empty action list`)
-            return
-        }
         for (let node of nodes) {
             const token = await RedisService.getToken(node.assetId)
             log.debug(`add new action[${node.method}] of token[${token}]`)
@@ -133,10 +110,6 @@ async function positionHandler(node: ActionNode) {
 
 async function marketHandler(nodes: MarketConfigNode[]) {
     try {
-        if (nodes.length < 1) {
-            log.debug(`empty market list`)
-            return
-        }
         for (let node of nodes) {
             const symbol = await RedisService.getToken(node.assetId)
             const decimals = await RedisService.getDecimals(node.assetId)
@@ -167,10 +140,6 @@ async function marketHandler(nodes: MarketConfigNode[]) {
 
 async function assetHandler(nodes: AssetConfigNode[]) {
     try {
-        if (nodes.length < 1) {
-            log.debug(`empty asset list`)
-            return
-        }
         for (let node of nodes) {
             const day = dayFromUtcTimestamp(node.timestamp)
             const symbol = await RedisService.getToken(node.assetId)
@@ -203,6 +172,7 @@ async function assetHandler(nodes: AssetConfigNode[]) {
 export async function lendingScanner(endpoint: string, block: number) {
     let { lastProcessedHeight } = await lastProcessedData(endpoint)
     log.info(`lending scanner run at[${block}], current lastProcessedHeight: ${lastProcessedHeight}`)
+
     while (true) {
         try {
             const start = Date.now()
@@ -215,8 +185,7 @@ export async function lendingScanner(endpoint: string, block: number) {
                           orderBy: BLOCK_HEIGHT_ASC,
                           filter: {
                               blockHeight: {
-                                  greaterThanOrEqualTo: ${block},
-                                  lessThan: ${block + FETCH_BLOCK}
+                                  equalTo: ${block},
                               }
                           }
                       ) {
@@ -241,8 +210,7 @@ export async function lendingScanner(endpoint: string, block: number) {
                         orderBy: BLOCK_HEIGHT_ASC,
                           filter: {
                               blockHeight: {
-                                  greaterThanOrEqualTo: ${block},
-                                  lessThan: ${block + FETCH_BLOCK}
+                                  equalTo: ${block},
                               }
                           }
                       ) {
@@ -263,8 +231,7 @@ export async function lendingScanner(endpoint: string, block: number) {
                         orderBy: BLOCK_HEIGHT_ASC,
                           filter: {
                               blockHeight: {
-                                  greaterThanOrEqualTo: ${block},
-                                  lessThan: ${block + FETCH_BLOCK}
+                                  equalTo: ${block},
                               }
                           }
                       ) {
@@ -299,7 +266,7 @@ export async function lendingScanner(endpoint: string, block: number) {
             // update scanner last block
             const newBlock = block + FETCH_BLOCK
             await RedisService.updateLastBlock(newBlock)
-
+            log.debug(`new block is ${newBlock}`)
             while (newBlock > lastProcessedHeight) {
                 // sleep 5s
                 await sleeps(5)

@@ -3,6 +3,9 @@ import { LendingAction } from './action'
 import { LendingMarketConfigure } from './market_config'
 import { LendingAssetConfigure } from './asset_config'
 import { LendingPosition } from './position'
+import { Pool } from './pool'
+import { AssetValue } from './asset_value'
+import { LiquidityPool } from './liquidity_pool'
 
 export * from './action'
 export * from './position'
@@ -20,7 +23,15 @@ export async function initDB(): Promise<Connection> {
         username: ENV.PG_DB_USER,
         password: ENV.PG_DB_PASSWORD,
         database: ENV.PG_DB_NAME,
-        entities: [LendingAction, LendingPosition, LendingMarketConfigure, LendingAssetConfigure],
+        entities: [
+            LendingAction, 
+            LendingPosition, 
+            LendingMarketConfigure, 
+            LendingAssetConfigure,
+            Pool,
+            AssetValue,
+            LiquidityPool,
+        ],
         synchronize: true,
         logger: 'debug',
     })

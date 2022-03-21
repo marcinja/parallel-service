@@ -82,7 +82,7 @@ export class RedisService {
         const token = await cacheRd.hget(KEYS.Cache.hToken(), assetId.toString())
         if (token === null) {
             log.error(`invalid asset id: ${assetId}`)
-            throw `invalid asset id: ${assetId}`
+            return 'unknown'
         }
         return token
     }

@@ -1,10 +1,11 @@
 import She from 'node-schedule'
-import { lendingScanner } from './subql'
+import { lendingScanner } from './subql/lending'
 import { getAppLogger, todayTimestamp } from '../libs'
 import { RedisService, userRd } from './redis'
 import { ApiService } from './query'
 import { LendingPosition } from '../models'
 import { getConnection } from 'typeorm'
+import { ammScanner } from './subql'
 
 export * from './pgsql'
 export * from './query'
@@ -58,6 +59,8 @@ export default class Service {
         const lastBlock = (await RedisService.getLastBlock())[0]
 
         lendingScanner(process.env.SUBQUERY_LENDING_ENDPOINT!, lastBlock)
+
+        ammScanner(process.env.SUBQUERY_AMM_ENDPOINT!, lastBlock)
 
         const positionHourlyJob = She.scheduleJob(HOUR_SCHEDULER, () => {
             positionUpdate()

@@ -14,6 +14,12 @@ export class Pool extends BaseEntity {
     @Column()
     quote_id!: number
 
+    @Column()
+    base_symbol!: string
+
+    @Column()
+    quote_symbol!: string
+
     @Index()
     @Column()
     block_number!: number
