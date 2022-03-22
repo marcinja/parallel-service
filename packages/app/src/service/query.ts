@@ -45,11 +45,11 @@ export class ApiService {
 
     static async getAssets(): Promise<number[]> {
         try {
-            const assets = await this.api.query.loans.markets.keys()
+            const assets = await this.api.query.assets.asset.keys()
             return assets.map((key: any) => {
                 let asset: string = key.toHuman()[0]
                 if (asset.includes(',')) {
-                    asset = asset.replace(',', '')
+                    asset = asset.replaceAll(',', '')
                 }
                 return Number(asset)
             })

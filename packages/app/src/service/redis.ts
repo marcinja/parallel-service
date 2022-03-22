@@ -55,7 +55,12 @@ export class RedisService {
             const meta = await ApiService.getAssetMeta(assetId)
             await Promise.all([this.setToken(assetId, meta.symbol), this.setDecimals(assetId, meta.decimals)])
         }
-        await Promise.all([this.setToken(101, 'DOT'), this.setDecimals(101, 10)])
+        await Promise.all([
+            this.setToken(101, 'DOT'),
+            this.setDecimals(101, 10),
+            this.setToken(102, 'USDT'), 
+            this.setDecimals(102, 6)
+        ])
     }
 
     static async getLastBlock(key: string): Promise<number[]> {
@@ -69,7 +74,7 @@ export class RedisService {
 
     static async updateLastBlock(key: string, block: number) {
         const updateAt = now()
-        let item: Record<string, number> = {} 
+        let item: Record<string, number> = {}
         item[`${key}_block`] = block
         item[`${key}_update`] = updateAt
         return cacheRd.hset(KEYS.Cache.hLastBlock(), item)

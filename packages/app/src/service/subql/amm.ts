@@ -169,6 +169,128 @@ async function handleAsset(nodes: AssetNode[]) {
     }
 }
 
+const ammSubql = (block: number) => 
+`{
+    query {
+        pools(
+            orderBy: BLOCK_HEIGHT_ASC,
+            filter: {
+                blockHeight: {
+                    equalTo: ${block},
+                }
+            }
+        ) {
+            nodes {
+                id
+                blockHeight
+                trader
+                baseTokenId
+                quoteTokenId
+                timestamp
+            }
+        }
+
+        liquidityPools(
+          orderBy: BLOCK_HEIGHT_ASC,
+            filter: {
+                blockHeight: {
+                    equalTo: ${block},
+                }
+            }
+        ) {
+            nodes {
+                id
+                blockHeight
+                poolId
+                action
+                baseVolume
+                quoteVolume
+                baseVolumeLast
+                quoteVolumnLase
+                basePriceCumulativeLast
+                quotePriceCumulativeLast
+                blockTimestampLast
+                timestamp
+            }
+        }
+        swapTrades(
+          orderBy: BLOCK_HEIGHT_ASC,
+            filter: {
+                blockHeight: {
+                    equalTo: ${block},
+                }
+            }
+        ) {
+            nodes {
+                id
+                blockHeight
+                trader
+                poolId
+                tokenFrom
+                tokenTo
+                amountFrom
+                amountTo
+                timestamp
+            }
+        }
+        contributeLiquidities(
+          orderBy: BLOCK_HEIGHT_ASC,
+            filter: {
+                blockHeight: {
+                    equalTo: ${block},
+                }
+            }
+        ) {
+            nodes {
+                id
+                blockHeight
+                sender
+                poolId
+                baseAmountAdded
+                quoteAmountAdded
+                timestamp
+            }
+        }
+
+        removeLiquidities(
+          orderBy: BLOCK_HEIGHT_ASC,
+            filter: {
+                blockHeight: {
+                    equalTo: ${block},
+                }
+            }
+        ) {
+            nodes {
+                id
+                sender
+                blockHeight
+                poolId
+                baseAmountRemoved
+                quoteAmountRemoved
+                timestamp
+            }
+        }
+
+        assetValues(
+          orderBy: BLOCK_HEIGHT_ASC,
+            filter: {
+                blockHeight: {
+                    equalTo: ${block},
+                }
+            }
+        ) {
+            nodes {
+                id
+                blockHeight
+                assetId
+                value
+                blockTimevalue
+            }
+        }
+    }
+}
+`
+
 export async function ammScanner(endpoint: string, block: number) {
     let { lastProcessedHeight } = await lastProcessedData(endpoint)
     log.info(`lending scanner run at[${block}], current lastProcessedHeight: ${lastProcessedHeight}`)
@@ -178,125 +300,7 @@ export async function ammScanner(endpoint: string, block: number) {
             log.debug(`start to fetch new AMM subquery data, block[${block}]`)
             const res = await request(
                 endpoint,
-                gql`{
-                  query {
-                      pools(
-                          orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block},
-                              }
-                          }
-                      ) {
-                          nodes {
-                              id
-                              blockHeight
-                              trader
-                              baseTokenId
-                              quoteTokenId
-                              timestamp
-                          }
-                      }
-
-                      liquidityPools(
-                        orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block},
-                              }
-                          }
-                      ) {
-                          nodes {
-                              id
-                              blockHeight
-                              poolId
-                              action
-                              baseVolume
-                              quoteVolume
-                              baseVolumeLast
-                              quoteVolumnLase
-                              basePriceCumulativeLast
-                              quotePriceCumulativeLast
-                              blockTimestampLast
-                              timestamp
-                          }
-                      }
-                      swapTrades(
-                        orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block},
-                              }
-                          }
-                      ) {
-                          nodes {
-                              id
-                              blockHeight
-                              trader
-                              poolId
-                              tokenFrom
-                              tokenTo
-                              amountFrom
-                              amountTo
-                              timestamp
-                          }
-                      }
-                      contributeLiquidities(
-                        orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block},
-                              }
-                          }
-                      ) {
-                          nodes {
-                              id
-                              blockHeight
-                              sender
-                              poolId
-                              baseAmountAdded
-                              quoteAmountAdded
-                              timestamp
-                          }
-                      }
-
-                      removeLiquidities(
-                        orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block},
-                              }
-                          }
-                      ) {
-                          nodes {
-                              id
-                              sender
-                              blockHeight
-                              poolId
-                              baseAmountRemoved
-                              quoteAmountRemoved
-                              timestamp
-                          }
-                      }
-
-                      assetValues(
-                        orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block},
-                              }
-                          }
-                      ) {
-                          nodes {
-                              id
-                              blockHeight
-                              assetId
-                              value
-                              blockTimevalue
-                          }
-                      }
-                  }
-              }`
+                gql`${ammSubql(block)}`
             )
             const {
                 query: { pools, liquidityPools, swapTrades, contributeLiquidities, removeLiquidities, assetValues },

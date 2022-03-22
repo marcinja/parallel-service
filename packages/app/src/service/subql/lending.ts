@@ -171,6 +171,83 @@ async function assetHandler(nodes: AssetConfigNode[]) {
     }
 }
 
+const lendingSubql = (block: number) =>
+`{
+    query {
+        lendingActions(
+            orderBy: BLOCK_HEIGHT_ASC,
+            filter: {
+                blockHeight: {
+                    equalTo: ${block},
+                }
+            }
+        ) {
+            nodes {
+                id
+                blockHeight
+                assetId
+                address
+                method
+                value
+                exchangeRate
+                borrowIndex
+                borrowBalance
+                supplyBalance
+                timestamp
+                totalEarnedPrior
+                exchangeRatePrior
+            }
+        }
+
+        lendingMarketConfigures(
+          orderBy: BLOCK_HEIGHT_ASC,
+            filter: {
+                blockHeight: {
+                    equalTo: ${block},
+                }
+            }
+        ) {
+            nodes {
+                id
+                blockHeight
+                assetId
+                collateralFactor
+                closeFactor
+                reserveFactor
+                liquidationIncentive
+                borrowCap
+                marketStatus
+                timestamp
+            }
+        }
+        lendingAssetConfigures(
+          orderBy: BLOCK_HEIGHT_ASC,
+            filter: {
+                blockHeight: {
+                    equalTo: ${block},
+                }
+            }
+        ) {
+            nodes {
+                id
+                blockHeight
+                assetId
+                totalSupply
+                totalBorrows
+                totalReserves
+                borrowIndex
+                borrowRate
+                supplyRate
+                exchangeRate
+                utilizationRatio
+                lastAccruedTimestamp
+                timestamp
+            }
+        }
+    }
+}
+`
+
 export async function lendingScanner(endpoint: string, block: number) {
     let { lastProcessedHeight } = await lastProcessedData(endpoint)
     log.info(`lending scanner run at[${block}], current lastProcessedHeight: ${lastProcessedHeight}`)
@@ -180,80 +257,7 @@ export async function lendingScanner(endpoint: string, block: number) {
             log.debug(`start to fetch new MM subquery data, block[${block}]`)
             const res = await request(
                 endpoint,
-                gql`{
-                  query {
-                      lendingActions(
-                          orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block},
-                              }
-                          }
-                      ) {
-                          nodes {
-                              id
-                              blockHeight
-                              assetId
-                              address
-                              method
-                              value
-                              exchangeRate
-                              borrowIndex
-                              borrowBalance
-                              supplyBalance
-                              timestamp
-                              totalEarnedPrior
-                              exchangeRatePrior
-                          }
-                      }
-
-                      lendingMarketConfigures(
-                        orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block},
-                              }
-                          }
-                      ) {
-                          nodes {
-                              id
-                              blockHeight
-                              assetId
-                              collateralFactor
-                              closeFactor
-                              reserveFactor
-                              liquidationIncentive
-                              borrowCap
-                              marketStatus
-                              timestamp
-                          }
-                      }
-                      lendingAssetConfigures(
-                        orderBy: BLOCK_HEIGHT_ASC,
-                          filter: {
-                              blockHeight: {
-                                  equalTo: ${block},
-                              }
-                          }
-                      ) {
-                          nodes {
-                              id
-                              blockHeight
-                              assetId
-                              totalSupply
-                              totalBorrows
-                              totalReserves
-                              borrowIndex
-                              borrowRate
-                              supplyRate
-                              exchangeRate
-                              utilizationRatio
-                              lastAccruedTimestamp
-                              timestamp
-                          }
-                      }
-                  }
-              }`
+                gql`${lendingSubql(block)}`
             )
             const {
                 query: { lendingActions, lendingMarketConfigures, lendingAssetConfigures },
