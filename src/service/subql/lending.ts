@@ -85,7 +85,8 @@ async function positionHandler(node: ActionNode) {
     // update account & asset info to redis cache
 
     try {
-        const token = await RedisService.getToken(node.assetId)
+        const symbol = await RedisService.getToken(node.assetId)
+        const decimals = await RedisService.getDecimals(node.assetId)
         const day = dayFromUtcTimestamp(node.timestamp)
 
         await getConnection()
@@ -93,7 +94,8 @@ async function positionHandler(node: ActionNode) {
             .save({
                 id: `${node.address}-${node.assetId}-${day}`,
                 address: node.address,
-                token,
+                symbol,
+                decimals,
                 supply_balance: node.supplyBalance,
                 borrow_balance: node.borrowBalance,
                 exchange_rate: node.exchangeRate,

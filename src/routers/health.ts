@@ -3,7 +3,7 @@ import { healthCheck } from '../controller'
 const R = new Router()
 
 /**
- * @api {get} /health healthCheck
+ * @api {get} /api/health healthCheck
  * @apiDescription get the service health status.
  *
  * @apiGroup Health

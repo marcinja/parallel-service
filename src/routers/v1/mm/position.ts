@@ -1,5 +1,5 @@
 import Router from 'koa-router'
-import { getPositionList, getLatestPositions } from '../controller'
+import { getPositionList, getLatestPositions } from '../../../controller'
 
 const R = new Router()
 

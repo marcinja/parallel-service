@@ -1,9 +1,9 @@
-import { Context } from 'koa'
+import { Context, Next } from 'koa'
 import { Between, FindOneOptions, LessThanOrEqual, MoreThan } from 'typeorm'
 import { Resp, parsePagenation, isValidInteger } from '../libs'
 import { LendingAction } from '../models'
 
-export async function getActionList(ctx: Context, next: any) {
+export async function getActionList(ctx: Context, next: Next) {
     const { pageIndex, pageSize, skip } = parsePagenation(ctx)
     const { address, symbol, startBlock, endBlock } = ctx.request.query
     const findOptions: FindOneOptions = {
@@ -59,3 +59,9 @@ export async function getActionList(ctx: Context, next: any) {
     })
     return next
 }
+
+
+export async function getActionListBySymbol(ctx: Context, next: Next) {
+    ctx.body = Resp.Ok()
+    return next()
+} 

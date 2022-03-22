@@ -9,7 +9,10 @@ export class LendingPosition extends BaseEntity {
     address!: string
 
     @Column()
-    token!: string
+    symbol!: string
+
+    @Column()
+    decimals!: number
 
     @Column()
     supply_balance!: string

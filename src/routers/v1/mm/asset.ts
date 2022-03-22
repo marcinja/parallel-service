@@ -1,5 +1,5 @@
 import Router from 'koa-router'
-import { getAllAssets, getLatestAssets, getLatestByAssetId } from '../controller'
+import { getAllAssets, getLatestAssets, getLatestByAssetId } from '../../../controller'
 const R = new Router()
 
 /**
