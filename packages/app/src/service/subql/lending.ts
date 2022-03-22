@@ -1,10 +1,6 @@
 import { gql, request } from 'graphql-request'
 import { getConnection } from 'typeorm'
-<<<<<<< HEAD:packages/app/src/service/subql/lending.ts
 import { getAppLogger, dayFromUtcTimestamp, sleeps } from '@parallel/lib'
-=======
-import { getAppLogger, dayFromUtcTimestamp, sleeps } from '../../libs'
->>>>>>> 7598e97de3c00fd04ab0900388f184d332a6c967:packages/app/src/service/subql/subql/lending.ts
 import { LendingAction, LendingAssetConfigure, LendingMarketConfigure, LendingPosition } from '../../models'
 import { addNewAction } from '../pgsql'
 import { RedisService } from '../redis'
