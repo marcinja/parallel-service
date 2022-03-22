@@ -58,21 +58,21 @@ export class RedisService {
         await Promise.all([this.setToken(101, 'DOT'), this.setDecimals(101, 10)])
     }
 
-    static async getLastBlock(): Promise<number[]> {
-        const [block, updateAt] = await cacheRd.hvals(KEYS.Cache.hLastBlock())
+    static async getLastBlock(key: string): Promise<number[]> {
+        const [block, update] = await cacheRd.hmget(KEYS.Cache.hLastBlock(), `${key}_block`, `${key}_update`)
         if (block === undefined) {
             log.warn(`last block cache should be initialized`)
             return [1, 0]
         }
-        return [Number(block), Number(updateAt)]
+        return [Number(block), Number(update)]
     }
 
-    static async updateLastBlock(block: number) {
+    static async updateLastBlock(key: string, block: number) {
         const updateAt = now()
-        return cacheRd.hset(KEYS.Cache.hLastBlock(), {
-            block,
-            updateAt,
-        })
+        let item: Record<string, number> = {} 
+        item[`${key}_block`] = block
+        item[`${key}_update`] = updateAt
+        return cacheRd.hset(KEYS.Cache.hLastBlock(), item)
     }
 
     static async setToken(assetId: number, token: string) {

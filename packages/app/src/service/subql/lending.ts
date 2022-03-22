@@ -265,7 +265,7 @@ export async function lendingScanner(endpoint: string, block: number) {
             await Promise.all([actionHandler(actionNodes), marketHandler(marketNodes), assetHandler(assetNodes)])
             // update scanner last block
             const newBlock = block + FETCH_BLOCK
-            await RedisService.updateLastBlock(newBlock)
+            await RedisService.updateLastBlock('MM', newBlock)
             while (newBlock > lastProcessedHeight) {
                 // sleep 5s
                 await sleeps(5)

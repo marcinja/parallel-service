@@ -5,8 +5,11 @@ import { RedisService } from '../service/redis'
 
 export async function healthCheck(ctx: Context, next: Next) {
     const curTime = now()
-    const updateAt = (await RedisService.getLastBlock())[1]
-    const timeout = moment(updateAt).add(1, 'minute').isBefore(curTime)
+    const re = await Promise.all([
+        RedisService.getLastBlock('MM'),
+        RedisService.getLastBlock('AMM')
+    ])
+    const timeout = moment(re[0][1]).add(1, 'minute').isBefore(curTime) || moment(re[1][1]).add(1, 'minute').isBefore(curTime)
     if (timeout) {
         throw Resp.Fail(Code.SyncTimeout, Msg.SyncTimeout)
     }

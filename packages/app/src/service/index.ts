@@ -58,11 +58,14 @@ export default class Service {
     static async run() {
         await RedisService.initAssetCache()
 
-        const lastBlock = (await RedisService.getLastBlock())[0]
+        const [mm, amm] = await Promise.all([
+            RedisService.getLastBlock('MM'),
+            RedisService.getLastBlock('AMM'),
+        ]) 
 
-        lendingScanner(process.env.SUBQUERY_LENDING_ENDPOINT!, lastBlock)
+        lendingScanner(process.env.SUBQUERY_LENDING_ENDPOINT!, mm[0])
 
-        ammScanner(process.env.SUBQUERY_AMM_ENDPOINT!, lastBlock)
+        ammScanner(process.env.SUBQUERY_AMM_ENDPOINT!, amm[0])
 
         const positionHourlyJob = She.scheduleJob(HOUR_SCHEDULER, () => {
             positionUpdate()

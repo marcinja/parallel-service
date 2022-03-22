@@ -55,7 +55,7 @@ export function getAppLogger(label: string = '', opt?: { isJson: boolean; consol
         format,
         transports: trans,
         exceptionHandlers: [newRotateFile('exception', 'error', false)],
-        exitOnError: false,
+        exitOnError: true,
     })
 }
 
@@ -69,6 +69,6 @@ export function accessLogger() {
         format: logFormat('access', false),
         transports: trans,
         exceptionHandlers: [newRotateFile('access-exception', 'error')],
-        exitOnError: false,
+        exitOnError: true,
     })
 }

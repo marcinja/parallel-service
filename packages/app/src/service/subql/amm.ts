@@ -318,7 +318,7 @@ export async function ammScanner(endpoint: string, block: number) {
             ])
             // update scanner last block
             const newBlock = block + FETCH_BLOCK
-            await RedisService.updateLastBlock(newBlock)
+            await RedisService.updateLastBlock('AMM', newBlock)
             while (newBlock > lastProcessedHeight) {
                 // sleep 5s
                 await sleeps(5)
