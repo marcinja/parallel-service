@@ -169,7 +169,7 @@ async function handleAsset(nodes: AssetNode[]) {
     }
 }
 
-const ammSubql = (block: number) => 
+const ammSubql = (block: number, fetchBlock: number) => 
 `{
     query {
         pools(
@@ -177,7 +177,7 @@ const ammSubql = (block: number) =>
             filter: {
                 blockHeight: {
                     greaterThanOrEqualTo: ${block},
-                    lessThan: ${block + FETCH_BLOCK}
+                    lessThan: ${block + fetchBlock}
                 }
             }
         ) {
@@ -196,7 +196,7 @@ const ammSubql = (block: number) =>
             filter: {
                 blockHeight: {
                     greaterThanOrEqualTo: ${block},
-                    lessThan: ${block + FETCH_BLOCK}
+                    lessThan: ${block + fetchBlock}
                 }
             }
         ) {
@@ -220,7 +220,7 @@ const ammSubql = (block: number) =>
             filter: {
                 blockHeight: {
                     greaterThanOrEqualTo: ${block},
-                    lessThan: ${block + FETCH_BLOCK}
+                    lessThan: ${block + fetchBlock}
                 }
             }
         ) {
@@ -241,7 +241,7 @@ const ammSubql = (block: number) =>
             filter: {
                 blockHeight: {
                     greaterThanOrEqualTo: ${block},
-                    lessThan: ${block + FETCH_BLOCK}
+                    lessThan: ${block + fetchBlock}
                 }
             }
         ) {
@@ -261,7 +261,7 @@ const ammSubql = (block: number) =>
             filter: {
                 blockHeight: {
                     greaterThanOrEqualTo: ${block},
-                    lessThan: ${block + FETCH_BLOCK}
+                    lessThan: ${block + fetchBlock}
                 }
             }
         ) {
@@ -281,7 +281,7 @@ const ammSubql = (block: number) =>
             filter: {
                 blockHeight: {
                     greaterThanOrEqualTo: ${block},
-                    lessThan: ${block + FETCH_BLOCK}
+                    lessThan: ${block + fetchBlock}
                 }
             }
         ) {
@@ -299,6 +299,7 @@ const ammSubql = (block: number) =>
 
 export async function ammScanner(endpoint: string, block: number) {
     let { lastProcessedHeight } = await lastProcessedData(endpoint)
+    let fetchBlock = FETCH_BLOCK
     log.info(`lending scanner run at[${block}], current lastProcessedHeight: ${lastProcessedHeight}`)
 
     while (true) {
@@ -306,7 +307,7 @@ export async function ammScanner(endpoint: string, block: number) {
             log.debug(`start to fetch new AMM subquery data, block[${block}]`)
             const res = await request(
                 endpoint,
-                gql`${ammSubql(block)}`
+                gql`${ammSubql(block, fetchBlock)}`
             )
             const {
                 query: { pools, liquidityPools, swapTrades, contributeLiquidities, removeLiquidities, assetValues },
@@ -327,7 +328,11 @@ export async function ammScanner(endpoint: string, block: number) {
                 handleAsset(assetNodes),
             ])
             // update scanner last block
-            const newBlock = block + FETCH_BLOCK
+            let newBlock = block + fetchBlock
+            if (newBlock > lastProcessedHeight) {
+                fetchBlock = 1
+                newBlock = block + 1
+            }
             await RedisService.updateLastBlock('AMM', newBlock)
             while (newBlock > lastProcessedHeight) {
                 // sleep 5s

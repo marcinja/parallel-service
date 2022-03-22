@@ -171,7 +171,7 @@ async function assetHandler(nodes: AssetConfigNode[]) {
     }
 }
 
-const lendingSubql = (block: number) =>
+const lendingSubql = (block: number, fetchBlock: number) =>
 `{
     query {
         lendingActions(
@@ -179,7 +179,7 @@ const lendingSubql = (block: number) =>
             filter: {
                 blockHeight: {
                     greaterThanOrEqualTo: ${block},
-                    lessThan: ${block + FETCH_BLOCK}
+                    lessThan: ${block + fetchBlock}    
                 }
             }
         ) {
@@ -205,7 +205,7 @@ const lendingSubql = (block: number) =>
             filter: {
                 blockHeight: {
                     greaterThanOrEqualTo: ${block},
-                    lessThan: ${block + FETCH_BLOCK}
+                    lessThan: ${block + fetchBlock}
                 }
             }
         ) {
@@ -227,7 +227,7 @@ const lendingSubql = (block: number) =>
             filter: {
                 blockHeight: {
                     greaterThanOrEqualTo: ${block},
-                    lessThan: ${block + FETCH_BLOCK}
+                    lessThan: ${block + fetchBlock}
                 }
             }
         ) {
@@ -254,13 +254,13 @@ const lendingSubql = (block: number) =>
 export async function lendingScanner(endpoint: string, block: number) {
     let { lastProcessedHeight } = await lastProcessedData(endpoint)
     log.info(`lending scanner run at[${block}], current lastProcessedHeight: ${lastProcessedHeight}`)
-
+    let fetchBlock: number = FETCH_BLOCK
     while (true) {
         try {
             log.debug(`start to fetch new MM subquery data, block[${block}]`)
             const res = await request(
                 endpoint,
-                gql`${lendingSubql(block)}`
+                gql`${lendingSubql(block, fetchBlock)}`
             )
             const {
                 query: { lendingActions, lendingMarketConfigures, lendingAssetConfigures },
@@ -271,7 +271,11 @@ export async function lendingScanner(endpoint: string, block: number) {
 
             await Promise.all([actionHandler(actionNodes), marketHandler(marketNodes), assetHandler(assetNodes)])
             // update scanner last block
-            const newBlock = block + FETCH_BLOCK
+            let newBlock = block + fetchBlock
+            if (newBlock > lastProcessedHeight) {
+                fetchBlock = 1
+                newBlock = block + 1
+            }
             await RedisService.updateLastBlock('MM', newBlock)
             while (newBlock > lastProcessedHeight) {
                 // sleep 5s
