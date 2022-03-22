@@ -6,7 +6,7 @@ import { LendingMarketConfigure } from '../../models'
 const log = getAppLogger('controller-mm-market')
 
 type DateItem = {
-    date: string,
+    date: string
     assets: string[]
 }
 
@@ -14,8 +14,8 @@ export async function getAllMarkets(ctx: Context, next: Next) {
     const { pageIndex, pageSize, skip } = parsePagenation(ctx)
     const findOptions: FindOneOptions = {
         order: {
-            id: 'ASC',
             block_number: 'ASC',
+            id: 'ASC'
         },
     }
 
@@ -28,21 +28,20 @@ export async function getAllMarkets(ctx: Context, next: Next) {
 
     // handle list by symbol group
     let res = {} as any
-    let dateList: DateItem[] = [] 
+    let dateList: DateItem[] = []
     let assets: string[] = []
     let curDate = dateFormat(list[0].block_timestamp, 'DD/MM/YYYY')
-    list.map(m => {
+    list.map((m) => {
         const date = dateFormat(m.block_timestamp, 'DD/MM/YYYY')
-        log.debug(`date: ${m.block_timestamp} ${date}`)
         res[m.symbol] = res[m.symbol] || []
         res[m.symbol].push(m)
         // date list
         if (curDate === date) {
-            assets.push(m.symbol)
+            !assets.includes(m.symbol) && assets.push(m.symbol)
         } else {
             dateList.push({
                 date: curDate,
-                assets
+                assets,
             })
             curDate = date
             assets = []
@@ -51,7 +50,7 @@ export async function getAllMarkets(ctx: Context, next: Next) {
     })
     dateList.push({
         date: curDate,
-        assets
+        assets,
     })
 
     ctx.body = Resp.Ok({
@@ -60,7 +59,7 @@ export async function getAllMarkets(ctx: Context, next: Next) {
         pageCount,
         totalSize,
         list: res,
-        dateList
+        dateList,
     })
     return next
 }
@@ -70,10 +69,10 @@ export async function getMarketsBySymbol(ctx: Context, next: Next) {
     const { symbol } = ctx.params
     const [list, totalSize] = await LendingMarketConfigure.findAndCount({
         order: {
-            block_number: 'ASC'
+            block_number: 'ASC',
         },
         where: {
-            symbol
+            symbol,
         },
         take: pageSize,
         skip,

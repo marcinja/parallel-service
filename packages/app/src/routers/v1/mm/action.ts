@@ -78,7 +78,7 @@ R.get('/', getActionList)
 
 /**
  * @api {get} /api/v1/mm/actions GetActionList
- * 
+ *
  */
 R.get('/:symbol', getActionListBySymbol)
 

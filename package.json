@@ -7,6 +7,13 @@
         "packages/*"
     ],
     "private": true,
+    "scripts": {
+        "api": "npx apidoc -i packages/app/src/routers -o doc/",
+        "doc": "npx apidoc-markdown -i packages/app/src/routers -o api.md",
+        "lint": "npx eslint packages --ext .js,.ts",
+        "lint:fix": "npx eslint --fix packages --ext .js,.ts",
+        "app": "yarn workspace @parallel/app"
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/parallel-finance/parallel-service"

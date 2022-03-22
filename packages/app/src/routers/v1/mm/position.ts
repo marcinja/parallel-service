@@ -4,7 +4,7 @@ import { getPositionList, getLatestPositions } from '../../../controller'
 const R = new Router()
 
 /**
- * @api {get} /position GetPositionList
+ * @api {get} /api/v1/mm/position GetPositionList
  * @apiDescription get position list by the query parameters.
  * All of they can be use in combination or individually according to your requirments.
  *
@@ -50,7 +50,7 @@ const R = new Router()
 R.get('/', getPositionList)
 
 /**
- * @api {get} /position/latest GetLatestPositions
+ * @api {get} /api/v1/mm/position/latest GetLatestPositions
  * @apiDescription get latest position by query parameters of today.
  *
  * @apiGroup Position

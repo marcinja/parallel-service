@@ -11,8 +11,6 @@
         "test": "jest",
         "lint": "npx eslint src test --ext .js,.ts",
         "lint:fix": "npx eslint --fix src test --ext .js,.ts",
-        "api": "npx apidoc -i src/routers -o doc/",
-        "doc": "npx apidoc-markdown -i src/routers -o api.md",
         "start": "yarn build && node dist/src/index.js"
     },
     "dependencies": {

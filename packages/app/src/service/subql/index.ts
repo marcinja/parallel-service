@@ -3,7 +3,6 @@ import { gql, request } from 'graphql-request'
 export * from './lending'
 export * from './amm'
 
-
 type SubqlMeta = {
     lastProcessedHeight: number
     lastProcessedTimestamp: string

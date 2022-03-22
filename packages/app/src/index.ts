@@ -3,7 +3,7 @@ import Koa from 'koa'
 import KoaBody from 'koa-body'
 import Router from 'koa-router'
 import { getAppLogger, unexpectListener } from '@parallel/lib'
-import { v1Router } from './routers'
+import { v1Router, healtRouter } from './routers'
 import { accessControl, accessMidware, errHanldle, responseTime } from './middleware'
 import { initDB } from './models'
 import Service from './service'
@@ -13,6 +13,7 @@ const log = getAppLogger('app')
 const app = new Koa()
 const router = new Router()
 
+router.use('/health', healtRouter)
 router.use('/api', v1Router)
 
 app.use(accessMidware)

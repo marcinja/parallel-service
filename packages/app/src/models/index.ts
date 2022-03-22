@@ -24,9 +24,9 @@ export async function initDB(): Promise<Connection> {
         password: ENV.PG_DB_PASSWORD,
         database: ENV.PG_DB_NAME,
         entities: [
-            LendingAction, 
-            LendingPosition, 
-            LendingMarketConfigure, 
+            LendingAction,
+            LendingPosition,
+            LendingMarketConfigure,
             LendingAssetConfigure,
             Pool,
             AssetValue,

@@ -1,6 +1,6 @@
 import { BaseEntity, Entity, Column, PrimaryColumn, Index } from 'typeorm'
 
-@Entity({name: 'asset_value'})
+@Entity({ name: 'asset_value' })
 export class AssetValue extends BaseEntity {
     @PrimaryColumn()
     id!: string // assetid-startOfHour

@@ -6,7 +6,7 @@ import { LendingPosition } from '../../models'
 const log = getAppLogger('controller-mm-position')
 
 type DateItem = {
-    date: string,
+    date: string
     assets: string[]
 }
 
@@ -16,7 +16,7 @@ export async function getPositionList(ctx: Context, next: Next) {
         order: {
             address: 'ASC',
             block_number: 'ASC',
-        }
+        },
     }
 
     const [list, totalSize] = await LendingPosition.findAndCount({
@@ -27,21 +27,20 @@ export async function getPositionList(ctx: Context, next: Next) {
     const pageCount = Math.floor(totalSize / pageSize) + 1
 
     let res = {} as any
-    let dateList: DateItem[] = [] 
+    let dateList: DateItem[] = []
     let assets: string[] = []
     let curDate = dateFormat(list[0].block_timestamp, 'DD/MM/YYYY')
-    list.map(m => {
+    list.map((m) => {
         const date = dateFormat(m.block_timestamp, 'DD/MM/YYYY')
         res[m.symbol] = res[m.symbol] || []
         res[m.symbol].push(m)
         // date list
-        log.debug(`curdate ${curDate} date[${date}]`)
         if (curDate === date) {
             assets.push(m.symbol)
         } else {
             dateList.push({
                 date: curDate,
-                assets
+                assets,
             })
             curDate = date
             assets = []
@@ -50,7 +49,7 @@ export async function getPositionList(ctx: Context, next: Next) {
     })
     dateList.push({
         date: curDate,
-        assets
+        assets,
     })
 
     ctx.body = Resp.Ok({
@@ -59,7 +58,7 @@ export async function getPositionList(ctx: Context, next: Next) {
         pageCount,
         totalSize,
         list: res,
-        dateList
+        dateList,
     })
     return next
 }

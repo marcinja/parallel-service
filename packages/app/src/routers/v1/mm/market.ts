@@ -71,7 +71,6 @@ const R = new Router()
  */
 R.get('/', getAllMarkets)
 
-
 /**
  * @api {get} /api/v1/mm/market/:symbol GetLatestMarkets
  * @apiDescription get market configure list by symbol, e.g. KSM.

@@ -3,8 +3,6 @@ import { getConnection } from 'typeorm'
 import { getAppLogger, dayFromUtcTimestamp, sleeps, startOfHour, getTimestamp } from '@parallel/lib'
 import { lastProcessedData } from '.'
 import { RedisService } from '../redis'
-import { UnsubscribePromise } from '@polkadot/api/types'
-import { loggers } from 'winston'
 import { Pool } from '../../models/pool'
 import { AssetValue } from '../../models/asset_value'
 import { LiquidityPool } from '../../models/liquidity_pool'
@@ -40,7 +38,7 @@ type SwapNode = {
     blockHeight: number
     trader: string
     poolId: number
-    tokenFrom: number   // asset id
+    tokenFrom: number // asset id
     tokenTo: string
     amountFrom: string
     amountTo: number
@@ -75,31 +73,27 @@ type AssetNode = {
     blockTimevalue: string
 }
 
-
 async function handlePool(nodes: PoolNode[]) {
     try {
         for (let node of nodes) {
             log.debug(`pool node: %o`, node)
             const baseSymbol = await RedisService.getToken(node.baseTokenId)
             const quoteSymbol = await RedisService.getToken(node.quoteTokenId)
-            await getConnection()
-                .getRepository(Pool)
-                .save({
-                    id: node.id,
-                    trader: node.trader,
-                    base_id: node.baseTokenId,
-                    base_symbol: baseSymbol,
-                    quote_id: node.quoteTokenId,
-                    quote_symbol: quoteSymbol,
-                    block_number: node.blockHeight,
-                    block_timestamp: node.timestamp
-                })
+            await getConnection().getRepository(Pool).save({
+                id: node.id,
+                trader: node.trader,
+                base_id: node.baseTokenId,
+                base_symbol: baseSymbol,
+                quote_id: node.quoteTokenId,
+                quote_symbol: quoteSymbol,
+                block_number: node.blockHeight,
+                block_timestamp: node.timestamp,
+            })
         }
     } catch (e: any) {
         log.error(`handle pool query error: ${e.message}`)
     }
 }
-
 
 async function handleLiquidityPool(nodes: LiquidityPoolNode[]) {
     try {
@@ -115,7 +109,7 @@ async function handleLiquidityPool(nodes: LiquidityPoolNode[]) {
                     baseVolume: node.baseVolume,
                     quoteVolume: node.quoteVolume,
                     block_number: node.blockHeight,
-                    block_timestamp: node.timestamp
+                    block_timestamp: node.timestamp,
                 })
         }
     } catch (e: any) {
@@ -167,7 +161,7 @@ async function handleAsset(nodes: AssetNode[]) {
                     symbol,
                     value: node.value,
                     block_number: node.blockHeight,
-                    block_timestamp: getTimestamp(node.blockTimevalue)
+                    block_timestamp: getTimestamp(node.blockTimevalue),
                 })
         }
     } catch (e: any) {
@@ -181,6 +175,7 @@ export async function ammScanner(endpoint: string, block: number) {
 
     while (true) {
         try {
+            log.debug(`start to fetch new AMM subquery data, block[${block}]`)
             const res = await request(
                 endpoint,
                 gql`{
@@ -319,12 +314,11 @@ export async function ammScanner(endpoint: string, block: number) {
                 handleSwap(swapNodes),
                 handleContribute(contributeNodes),
                 handleRemove(removeNodes),
-                handleAsset(assetNodes)
+                handleAsset(assetNodes),
             ])
             // update scanner last block
             const newBlock = block + FETCH_BLOCK
             await RedisService.updateLastBlock(newBlock)
-            log.debug(`new block is ${newBlock}`)
             while (newBlock > lastProcessedHeight) {
                 // sleep 5s
                 await sleeps(5)

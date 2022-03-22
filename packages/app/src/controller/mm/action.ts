@@ -60,8 +60,7 @@ export async function getActionList(ctx: Context, next: Next) {
     return next
 }
 
-
 export async function getActionListBySymbol(ctx: Context, next: Next) {
     ctx.body = Resp.Ok()
     return next()
-} 
+}

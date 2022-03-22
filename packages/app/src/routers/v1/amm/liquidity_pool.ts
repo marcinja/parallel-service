@@ -1,16 +1,8 @@
-import { Context } from 'koa'
 import Router from 'koa-router'
-import {} from '../../../controller'
-import { Resp } from '@parallel/lib'
+import { getDailyVolume } from '../../../controller/amm'
+
 const R = new Router()
 
-
-
-
-async function getDailyVolume(ctx: Context, next: any) {
-    ctx.body = Resp.Ok()
-}
-
-R.get('/daily/volume', getDailyVolume)
+R.get('/pool/liquidity/daily', getDailyVolume)
 
 export const liquidityRouter = R.routes()

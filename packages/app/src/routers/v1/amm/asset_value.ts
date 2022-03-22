@@ -5,4 +5,4 @@ const R = new Router()
 
 R.get('/pool/list', getPoolList)
 
-export const poolRouter = R.routes()
+export const assetRouter = R.routes()

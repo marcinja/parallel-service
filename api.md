@@ -20,6 +20,8 @@ parallel lending service api doc
 - [Position](#Position)
   - [GetLatestPositions](#GetLatestPositions)
   - [GetPositionList](#GetPositionList)
+- [Usersbruceparallel-servicev1mmaction.ts](#Usersbruceparallel-servicev1mmaction.ts)
+  - [GetActionList](#GetActionList)
 
 ___
 
@@ -32,7 +34,7 @@ ___
 <p>get action list by the query parameters. All of they can be use in combination or individually according to your requirments.</p>
 
 ```
-GET /action
+GET /api/v1/mm/actions
 ```
 
 ### Query Parameters
@@ -124,7 +126,7 @@ GET /action
 <p>get asset configure list by the query parameters. All of they can be use in combination or individually according to your requirments.</p>
 
 ```
-GET /asset
+GET /api/v1/mm/asset
 ```
 
 ### Query Parameters
@@ -217,7 +219,7 @@ GET /asset
 <p>get latest asset configure of today by asset id.</p>
 
 ```
-GET /asset/latest/:assetId
+GET /api/v1/mm/latest/:assetId
 ```
 
 ## <a name='GetLatestAssets'></a> GetLatestAssets
@@ -226,7 +228,7 @@ GET /asset/latest/:assetId
 <p>get latest asset configure of today.</p>
 
 ```
-GET /asset/latest
+GET /api/v1/mm/asset/latest
 ```
 
 # <a name='Health'></a> Health
@@ -237,7 +239,7 @@ GET /asset/latest
 <p>get the service health status.</p>
 
 ```
-GET /health
+GET /api/health
 ```
 
 ### Success response example
@@ -258,17 +260,16 @@ GET /health
 ## <a name='GetAllMarkets'></a> GetAllMarkets
 [Back to top](#top)
 
-<p>get all market configure by query parameter.</p>
+<p>get all market configure list.</p>
 
 ```
-GET /market
+GET /api/v1/mm/market
 ```
 
 ### Query Parameters
 
 | Name     | Type       | Description                           |
 |----------|------------|---------------------------------------|
-| symbol | `String` | <p>asset symbol, e.g. KSM</p> |
 | pageIndex | `Number` | <p>paganation</p> |
 | pageSize | `Number` | <p>paganation</p> |
 
@@ -282,11 +283,11 @@ GET /market
  msg: 'ok',
  data: {
      pageIndex: 1,
-     pageSize: 3,
+     pageSize: 2,
      pageCount: 4,
      totalSize: 11,
-     list: [
-         {
+     list: {
+     "XKSM":[{
                 "id": "1000-1646870400000",
                 "symbol": "XKSM",
                 "collateral_factor": "500000",
@@ -298,21 +299,8 @@ GET /market
                 "borrow_enabled": true,
                 "block_number": 8954,
                 "block_timestamp": "2022-03-10T23:59:54.050Z"
-            },
-            {
-                "id": "1000-1646956800000",
-                "symbol": "XKSM",
-                "collateral_factor": "500000",
-                "borrow_cap": "100000000000000000",
-                "close_factor": "500000",
-                "liquidation_incentive": "1100000000000000000",
-                "reserve_factor": "150000",
-                "decimals": 12,
-                "borrow_enabled": true,
-                "block_number": 16047,
-                "block_timestamp": "2022-03-11T23:59:54.055Z"
-            },
-            {
+            }],
+        "KSM":[{
                 "id": "100-1646870400000",
                 "symbol": "KSM",
                 "collateral_factor": "500000",
@@ -324,8 +312,11 @@ GET /market
                 "borrow_enabled": true,
                 "block_number": 8954,
                 "block_timestamp": "2022-03-10T23:59:54.050Z"
-            }
-     ]
+            }]
+     },
+        dateList: [
+            {"date":"10/03/2022","assets":[""XKSM","KSM"]}
+        ]
  }
 }
 ```
@@ -348,7 +339,7 @@ GET /market
 <p>get latest market configure of today by symbol.</p>
 
 ```
-GET /market/latest/:symbol
+GET /api/v1/mm/market/latest/:symbol
 ```
 
 ## <a name='GetLatestMarkets'></a> GetLatestMarkets
@@ -357,7 +348,7 @@ GET /market/latest/:symbol
 <p>get latest market configure of tody.</p>
 
 ```
-GET /market/latest
+GET /api/v1/mm/market/latest
 ```
 
 # <a name='Position'></a> Position
@@ -368,7 +359,7 @@ GET /market/latest
 <p>get latest position by query parameters of today.</p>
 
 ```
-GET /position/latest
+GET /api/v1/mm/position/latest
 ```
 
 ### Query Parameters
@@ -384,7 +375,7 @@ GET /position/latest
 <p>get position list by the query parameters. All of they can be use in combination or individually according to your requirments.</p>
 
 ```
-GET /position
+GET /api/v1/mm/position
 ```
 
 ### Query Parameters
@@ -432,5 +423,14 @@ GET /position
             }
         ]
     }
+```
+
+# <a name='Usersbruceparallel-servicev1mmaction.ts'></a> Usersbruceparallel-servicev1mmaction.ts
+
+## <a name='GetActionList'></a> GetActionList
+[Back to top](#top)
+
+```
+GET /api/v1/mm/actions
 ```
 

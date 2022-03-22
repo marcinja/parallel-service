@@ -3,7 +3,7 @@ import { getAllAssets, getLatestAssets, getLatestByAssetId } from '../../../cont
 const R = new Router()
 
 /**
- * @api {get} /asset GetAllAssets
+ * @api {get} /api/v1/mm/asset GetAllAssets
  * @apiDescription get asset configure list by the query parameters.
  * All of they can be use in combination or individually according to your requirments.
  *
@@ -80,7 +80,7 @@ const R = new Router()
 R.get('/', getAllAssets)
 
 /**
- * @api {get} /asset/latest GetLatestAssets
+ * @api {get} /api/v1/mm/asset/latest GetLatestAssets
  * @apiDescription get latest asset configure of today.
  *
  * @apiGroup Asset
@@ -89,7 +89,7 @@ R.get('/', getAllAssets)
 R.get('/latest', getLatestAssets)
 
 /**
- * @api {get} /asset/latest/:assetId GetLatestAssetByAssetId
+ * @api {get} /api/v1/mm/latest/:assetId GetLatestAssetByAssetId
  * @apiDescription get latest asset configure of today by asset id.
  *
  * @apiGroup Asset

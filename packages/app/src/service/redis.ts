@@ -53,15 +53,9 @@ export class RedisService {
         const assetIds = await ApiService.getAssets()
         for (let assetId of assetIds) {
             const meta = await ApiService.getAssetMeta(assetId)
-            await Promise.all([
-                this.setToken(assetId, meta.symbol), 
-                this.setDecimals(assetId, meta.decimals)
-            ])
+            await Promise.all([this.setToken(assetId, meta.symbol), this.setDecimals(assetId, meta.decimals)])
         }
-        await Promise.all([
-            this.setToken(101, 'DOT'),
-            this.setDecimals(101, 10)
-        ])
+        await Promise.all([this.setToken(101, 'DOT'), this.setDecimals(101, 10)])
     }
 
     static async getLastBlock(): Promise<number[]> {

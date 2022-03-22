@@ -1,6 +1,6 @@
-import Router from "koa-router";
-import { mmV1Router } from "./mm";
-import { ammV1Router } from "./amm";
+import Router from 'koa-router'
+import { mmV1Router } from './mm'
+import { ammV1Router } from './amm'
 
 const R = new Router()
 

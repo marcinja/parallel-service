@@ -177,8 +177,7 @@ export async function lendingScanner(endpoint: string, block: number) {
 
     while (true) {
         try {
-            const start = Date.now()
-            log.debug(`start to fetch new subquery data`)
+            log.debug(`start to fetch new MM subquery data, block[${block}]`)
             const res = await request(
                 endpoint,
                 gql`{
@@ -262,13 +261,11 @@ export async function lendingScanner(endpoint: string, block: number) {
             const actionNodes = lendingActions.nodes
             const marketNodes = lendingMarketConfigures.nodes
             const assetNodes = lendingAssetConfigures.nodes
-            log.debug(`fetch subquery time: ${Date.now() - start}`)
+
             await Promise.all([actionHandler(actionNodes), marketHandler(marketNodes), assetHandler(assetNodes)])
-            log.debug(`handle subquery fetch time: ${Date.now() - start}`)
             // update scanner last block
             const newBlock = block + FETCH_BLOCK
             await RedisService.updateLastBlock(newBlock)
-            log.debug(`new block is ${newBlock}`)
             while (newBlock > lastProcessedHeight) {
                 // sleep 5s
                 await sleeps(5)
