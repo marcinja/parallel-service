@@ -2,20 +2,20 @@ import { Entity, Column, BaseEntity, Index, PrimaryColumn } from 'typeorm'
 
 @Entity({ name: 'liquidity_pool' })
 export class LiquidityPool extends BaseEntity {
-    @PrimaryColumn()
+    @PrimaryColumn({ type: 'varchar' })
     id!: string
 
-    @Column()
+    @Column({type: 'int'})
     poolId!: number
 
-    @Column()
+    @Column({ type: 'varchar' })
     baseVolume!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     quoteVolume!: string
 
     @Index()
-    @Column()
+    @Column({type: 'int'})
     block_number!: number
 
     @Column({ type: 'timestamptz' })

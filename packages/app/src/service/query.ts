@@ -49,7 +49,11 @@ export class ApiService {
             return assets.map((key: any) => {
                 let asset: string = key.toHuman()[0]
                 if (asset.includes(',')) {
-                    asset = asset.replaceAll(',', '')
+                    log.warn(`${asset}`)
+
+                    // asset = asset.replaceAll(',', '')
+                    asset = asset.replace(/\,/g, '')
+                    log.warn(`${asset}`)
                 }
                 return Number(asset)
             })

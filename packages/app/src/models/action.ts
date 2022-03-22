@@ -2,35 +2,35 @@ import { Entity, Column, BaseEntity, PrimaryColumn, Index } from 'typeorm'
 
 @Entity({ name: 'lending_action' })
 export class LendingAction extends BaseEntity {
-    @PrimaryColumn()
+    @PrimaryColumn({ type: 'varchar' })
     id!: string // tx hash
 
-    @Column()
+    @Column({type: 'varchar'})
     address!: string
 
-    @Column()
+    @Column({type: 'varchar'})
     token!: string
 
-    @Column()
+    @Column({type: 'varchar'})
     amount!: string
 
-    @Column()
+    @Column({type: 'varchar'})
     method!: string
 
-    @Column()
+    @Column({type: 'varchar'})
     supply_balance!: string
 
-    @Column()
+    @Column({type: 'varchar'})
     borrow_balance!: string
 
-    @Column()
+    @Column({type: 'varchar'})
     borrow_index!: string
 
-    @Column()
+    @Column({type: 'varchar'})
     exchange_rate!: string
 
     @Index()
-    @Column()
+    @Column({type: 'int'})
     block_number!: number
 
     @Column({ type: 'timestamptz' })

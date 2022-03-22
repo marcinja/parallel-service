@@ -12,7 +12,8 @@
         "doc": "npx apidoc-markdown -i packages/app/src/routers -o api.md",
         "lint": "npx eslint packages --ext .js,.ts",
         "lint:fix": "npx eslint --fix packages --ext .js,.ts",
-        "app": "yarn workspace @parallel/app"
+        "app": "yarn workspace @parallel/app",
+        "build": "ts-node packages/scripts/build.ts"
     },
     "repository": {
         "type": "git",

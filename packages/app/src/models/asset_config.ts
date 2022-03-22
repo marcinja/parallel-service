@@ -2,46 +2,46 @@ import { BaseEntity, Column, Entity, Index, PrimaryColumn } from 'typeorm'
 
 @Entity({ name: 'lending_asset_config' })
 export class LendingAssetConfigure extends BaseEntity {
-    @PrimaryColumn()
+    @PrimaryColumn({ type: 'varchar' })
     id!: string
 
     @Index()
-    @Column()
+    @Column({ type: 'int' })
     block_number!: number
 
-    @Column()
+    @Column({ type: 'int' })
     asset_id!: number
 
-    @Column()
+    @Column({ type: 'varchar' })
     symbol!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     total_supply!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     total_borrows!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     total_reserves!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     borrow_index!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     borrow_rate!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     supply_rate!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     exchange_rate!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     utilization_ratio!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     last_accrued_timestamp!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     block_timestamp!: string
 }

@@ -2,26 +2,26 @@ import { Entity, Column, BaseEntity, PrimaryColumn, Index } from 'typeorm'
 
 @Entity({ name: 'pool' })
 export class Pool extends BaseEntity {
-    @PrimaryColumn()
+    @PrimaryColumn({ type: 'int' })
     id!: number
 
-    @Column()
+    @Column({ type: 'varchar' })
     trader!: string
 
-    @Column()
+    @Column({type: 'int'})
     base_id!: number
 
-    @Column()
+    @Column({type: 'int'})
     quote_id!: number
 
-    @Column()
+    @Column({ type: 'varchar' })
     base_symbol!: string
 
-    @Column()
+    @Column({ type: 'varchar' })
     quote_symbol!: string
 
     @Index()
-    @Column()
+    @Column({type: 'int'})
     block_number!: number
 
     @Column({ type: 'timestamptz' })
