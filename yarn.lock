@@ -1159,6 +1159,13 @@
   resolved "https://registry.yarnpkg.com/@types/http-errors/-/http-errors-1.8.2.tgz#7315b4c4c54f82d13fa61c228ec5c2ea5cc9e0e1"
   integrity sha512-EqX+YQxINb+MeXaIqYDASb6U6FCHbWjkj4a1CKDBks3d/QiB2+PqBLyO72vLDgAO1wUI4O+9gweRcQK11bTL/w==
 
+"@types/ioredis@^4.26.3":
+  version "4.28.10"
+  resolved "https://registry.yarnpkg.com/@types/ioredis/-/ioredis-4.28.10.tgz#40ceb157a4141088d1394bb87c98ed09a75a06ff"
+  integrity sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/ioredis@^4.28.8":
   version "4.28.8"
   resolved "https://registry.yarnpkg.com/@types/ioredis/-/ioredis-4.28.8.tgz#a181d6eb70e402a6db670fe54b9c5bb66c0fac17"
@@ -2445,6 +2452,11 @@ dot-prop@^5.2.0:
   dependencies:
     is-obj "^2.0.0"
 
+dotenv@^10.0.0:
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-10.0.0.tgz#3d4227b8fb95f81096cdd2b66653fb2c7085ba81"
+  integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
+
 dotenv@^8.2.0:
   version "8.6.0"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.6.0.tgz#061af664d19f7f4d8fc6e4ff9b584ce237adcb8b"
@@ -3457,7 +3469,7 @@ interpret@^2.2.0:
   resolved "https://registry.yarnpkg.com/interpret/-/interpret-2.2.0.tgz#1a78a0b5965c40a5416d007ad6f50ad27c417df9"
   integrity sha512-Ju0Bz/cEia55xDwUWEa8+olFpCiQoypjnQySseKtmjNrnps3P+xfpUmGr90T7yjlVJmOtybRvPXhKMbHr+fWnw==
 
-ioredis@^4.28.5:
+ioredis@^4.27.2, ioredis@^4.28.5:
   version "4.28.5"
   resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-4.28.5.tgz#5c149e6a8d76a7f8fa8a504ffc85b7d5b6797f9f"
   integrity sha512-3GYo0GJtLqgNXj4YhrisLaNNvWSNwSS2wS4OELGfGxH8I69+XfNdnmV1AyN+ZqMh0i7eX+SWjrwFKDBDgfBC1A==
@@ -6119,7 +6131,7 @@ wildcard@^2.0.0:
   resolved "https://registry.yarnpkg.com/wildcard/-/wildcard-2.0.0.tgz#a77d20e5200c6faaac979e4b3aadc7b3dd7f8fec"
   integrity sha512-JcKqAHLPxcdb9KM49dufGXn2x3ssnfjbcaQdLlfZsL9rH9wgDQjUtDxbo8NE0F6SFvydeu1VhZe7hZuHsB2/pw==
 
-winston-daily-rotate-file@^4.6.1:
+winston-daily-rotate-file@^4.5.5, winston-daily-rotate-file@^4.6.1:
   version "4.6.1"
   resolved "https://registry.yarnpkg.com/winston-daily-rotate-file/-/winston-daily-rotate-file-4.6.1.tgz#35c9db5669c381ed32acdb5849de69ab046a7a71"
   integrity sha512-Ycch4LZmTycbhgiI2eQXBKI1pKcEQgAqmBjyq7/dC6Dk77nasdxvhLKraqTdCw7wNDSs8/M0jXaLATHquG7xYg==
