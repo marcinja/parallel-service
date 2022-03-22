@@ -1,8 +1,8 @@
 import Router from 'koa-router'
-import { getPoolList } from '../../../controller/amm/pool'
+import { getAssetValues } from '../../../controller/amm'
 
 const R = new Router()
 
-R.get('/pool/list', getPoolList)
+R.get('/assets/value', getAssetValues)
 
 export const assetRouter = R.routes()

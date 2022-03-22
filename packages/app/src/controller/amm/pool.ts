@@ -1,5 +1,4 @@
-import { Next } from 'koa'
-import { Context } from 'vm'
+import { Context, Next } from 'koa'
 import { Resp } from '@parallel/lib'
 import { Pool } from '../../models/pool'
 

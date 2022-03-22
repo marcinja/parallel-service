@@ -1,14 +1,24 @@
-import { Next } from 'koa'
-import { Context } from 'vm'
-import { Resp } from '@parallel/lib'
+import { Context, Next } from 'koa'
+import { Resp, parsePagenation } from '@parallel/lib'
 import { AssetValue } from '../../models/asset_value'
 
 export async function getAssetValues(ctx: Context, next: Next) {
-    const re = await AssetValue.find({
+    const { pageIndex, pageSize, skip } = parsePagenation(ctx)
+
+    const [list, totalSize] = await AssetValue.findAndCount({
         order: {
-            id: 'ASC',
+            block_number: 'ASC',
         },
+        take: pageSize,
+        skip,
     })
-    ctx.body = Resp.Ok(re)
+    const pageCount = Math.floor(totalSize / pageSize) + 1
+    ctx.body = Resp.Ok({
+        pageIndex,
+        pageSize,
+        totalSize,
+        pageCount,
+        list,
+    })
     return next()
 }
