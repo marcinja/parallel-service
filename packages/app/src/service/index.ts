@@ -1,6 +1,10 @@
 import She from 'node-schedule'
 import { lendingScanner } from './subql/lending'
+<<<<<<< HEAD:packages/app/src/service/index.ts
 import { getAppLogger, todayTimestamp } from '@parallel/lib'
+=======
+import { getAppLogger, todayTimestamp } from '../libs'
+>>>>>>> 7598e97de3c00fd04ab0900388f184d332a6c967:src/service/index.ts
 import { RedisService, userRd } from './redis'
 import { ApiService } from './query'
 import { LendingPosition } from '../models'
