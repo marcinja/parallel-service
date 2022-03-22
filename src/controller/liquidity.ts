@@ -1,7 +1,7 @@
-import { Context } from 'koa'
+import { Context, Next } from 'koa'
 import { Resp } from '../libs'
 
-export async function getLiquidity(ctx: Context, next: any) {
+export async function getLiquidity(ctx: Context, next: Next) {
     ctx.body = Resp.Ok()
     return next
 }

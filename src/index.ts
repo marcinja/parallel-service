@@ -3,7 +3,7 @@ import Koa from 'koa'
 import KoaBody from 'koa-body'
 import Router from 'koa-router'
 import { getAppLogger, unexpectListener } from './libs'
-import { actionRouter, marketRouter, positionRouter, assetRouter, healtRouter, liquidityRouter } from './routers'
+import { v1Router } from './routers'
 import { accessControl, accessMidware, errHanldle, responseTime } from './middleware'
 import { initDB } from './models'
 import Service from './service'
@@ -13,12 +13,7 @@ const log = getAppLogger('app')
 const app = new Koa()
 const router = new Router()
 
-router.use('/action', actionRouter)
-router.use('/market', marketRouter)
-router.use('/position', positionRouter)
-router.use('/asset', assetRouter)
-router.use('/health', healtRouter)
-router.use('/liquidity', liquidityRouter)
+router.use('/api', v1Router)
 
 app.use(accessMidware)
     .use(KoaBody({ json: true }))

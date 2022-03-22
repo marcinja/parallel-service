@@ -1,9 +1,9 @@
-import { Context } from 'koa'
+import { Context, Next } from 'koa'
 import { Like, FindOneOptions } from 'typeorm'
 import { Resp, parsePagenation, todayTimestamp, isValidInteger, Code, Msg } from '../libs'
 import { LendingAssetConfigure } from '../models'
 
-export async function getAllAssets(ctx: Context, next: any) {
+export async function getAllAssets(ctx: Context, next: Next) {
     const { pageIndex, pageSize, skip } = parsePagenation(ctx)
     const { assetId } = ctx.request.query
 
@@ -38,7 +38,7 @@ export async function getAllAssets(ctx: Context, next: any) {
     return next
 }
 
-export async function getLatestAssets(ctx: Context, next: any) {
+export async function getLatestAssets(ctx: Context, next: Next) {
     const today = todayTimestamp()
     const re = await LendingAssetConfigure.find({
         where: {
@@ -49,7 +49,7 @@ export async function getLatestAssets(ctx: Context, next: any) {
     return next
 }
 
-export async function getLatestByAssetId(ctx: Context, next: any) {
+export async function getLatestByAssetId(ctx: Context, next: Next) {
     const { assetId } = ctx.params
     const today = todayTimestamp()
     const re = await LendingAssetConfigure.findOne({

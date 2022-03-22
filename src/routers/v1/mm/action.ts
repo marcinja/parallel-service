@@ -1,9 +1,9 @@
 import Router from 'koa-router'
-import { getActionList } from '../controller'
+import { getActionList, getActionListBySymbol } from '../../../controller'
 const R = new Router()
 
 /**
- * @api {get} /action GetActionList
+ * @api {get} /api/v1/mm/actions GetActionList
  * @apiDescription get action list by the query parameters.
  * All of they can be use in combination or individually according to your requirments.
  *
@@ -75,5 +75,11 @@ const R = new Router()
  * }
  */
 R.get('/', getActionList)
+
+/**
+ * @api {get} /api/v1/mm/actions GetActionList
+ * 
+ */
+R.get('/:symbol', getActionListBySymbol)
 
 export const actionRouter = R.routes()

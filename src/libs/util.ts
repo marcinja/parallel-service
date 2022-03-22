@@ -54,6 +54,10 @@ export const now = (): number => {
     return Mom().utc(false).valueOf()
 }
 
+export const dateFormat = (timestamp: string, format: string): string => {
+    return Mom(timestamp).utc(false).format(format).toString()
+}
+
 type PageQuery = {
     pageSize: number
     pageIndex: number

@@ -32,11 +32,13 @@ async function positionUpdate() {
             assets.forEach(async (assetId) => {
                 const data = await ApiService.getAccountLendingStorage(address, Number(assetId))
                 const day = todayTimestamp()
-                const token = await RedisService.getToken(Number(assetId))
+                const symbol = await RedisService.getToken(Number(assetId))
+                const decimals = await RedisService.getDecimals(Number(assetId))
                 rep.save({
                     id: `${address}-${assetId}-${day}`,
                     address,
-                    token,
+                    symbol,
+                    decimals,
                     supply_balance: data.supplyBalance,
                     borrow_balance: data.borrowBalance,
                     exchange_rate: data.exchangeRate,
