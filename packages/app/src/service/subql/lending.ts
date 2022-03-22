@@ -7,7 +7,7 @@ import { RedisService } from '../redis'
 import { lastProcessedData } from '.'
 
 const log = getAppLogger('service-lending')
-const FETCH_BLOCK = 1
+const FETCH_BLOCK = 100
 
 type ActionNode = {
     id: string
@@ -178,7 +178,8 @@ const lendingSubql = (block: number) =>
             orderBy: BLOCK_HEIGHT_ASC,
             filter: {
                 blockHeight: {
-                    equalTo: ${block},
+                    greaterThanOrEqualTo: ${block},
+                    lessThan: ${block + FETCH_BLOCK}
                 }
             }
         ) {
@@ -203,7 +204,8 @@ const lendingSubql = (block: number) =>
           orderBy: BLOCK_HEIGHT_ASC,
             filter: {
                 blockHeight: {
-                    equalTo: ${block},
+                    greaterThanOrEqualTo: ${block},
+                    lessThan: ${block + FETCH_BLOCK}
                 }
             }
         ) {
@@ -224,7 +226,8 @@ const lendingSubql = (block: number) =>
           orderBy: BLOCK_HEIGHT_ASC,
             filter: {
                 blockHeight: {
-                    equalTo: ${block},
+                    greaterThanOrEqualTo: ${block},
+                    lessThan: ${block + FETCH_BLOCK}
                 }
             }
         ) {

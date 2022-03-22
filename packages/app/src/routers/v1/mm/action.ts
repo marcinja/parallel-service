@@ -3,7 +3,7 @@ import { getActionList, getActionListBySymbol } from '../../../controller'
 const R = new Router()
 
 /**
- * @api {get} /api/v1/mm/actions GetActionList
+ * @api {get} /api/v1/mm/action GetActionList
  * @apiDescription get action list by the query parameters.
  * All of they can be use in combination or individually according to your requirments.
  *
@@ -12,7 +12,6 @@ const R = new Router()
  * @apiQuery {Number} startBlock actions more than startBlock
  * @apiQuery {Number} endBlock  actions lessn than or equal to endBlock
  * @apiQuery {String} address   user address
- * @apiQuery {String} symbol    asset symbol, e.g. KSM
  * @apiQuery {Number} pageIndex paganation
  * @apiQuery {Number} pageSize  paganation
  * @apiSuccessExample {json} success
@@ -54,7 +53,7 @@ const R = new Router()
             {
                 "id": "0x5fa6a75d1028d1eda34e7630e41d744cf8c5169c3fc74da81eb5d87e5d58c4f5",
                 "address": "hJLQoRFTEnxkAz4m15N29btT5vvn6gLCzjm5dZYaVRPtrRZLK",
-                "token": "KSM",
+                "token": "sKSM",
                 "amount": "100000000000000",
                 "method": "Borrowed",
                 "supply_balance": "50000000000000000",
@@ -77,7 +76,10 @@ const R = new Router()
 R.get('/', getActionList)
 
 /**
- * @api {get} /api/v1/mm/actions GetActionList
+ * @api {get} /api/v1/mm/action/:symbol GetActionListBySymbol
+ * @apiDescription get action list by symbol
+ * @apiGroup Action
+ * @apiVersion 0.1.0
  *
  */
 R.get('/:symbol', getActionListBySymbol)

@@ -5,7 +5,7 @@ import { LendingAction } from '../../models'
 
 export async function getActionList(ctx: Context, next: Next) {
     const { pageIndex, pageSize, skip } = parsePagenation(ctx)
-    const { address, symbol, startBlock, endBlock } = ctx.request.query
+    const { address, startBlock, endBlock } = ctx.request.query
     const findOptions: FindOneOptions = {
         order: {
             address: 'ASC',
@@ -15,13 +15,6 @@ export async function getActionList(ctx: Context, next: Next) {
     if (address) {
         findOptions.where = {
             address,
-        }
-    }
-
-    if (symbol) {
-        findOptions.where = {
-            ...findOptions.where,
-            token: symbol,
         }
     }
 
@@ -61,6 +54,25 @@ export async function getActionList(ctx: Context, next: Next) {
 }
 
 export async function getActionListBySymbol(ctx: Context, next: Next) {
-    ctx.body = Resp.Ok()
+    const { pageIndex, pageSize, skip } = parsePagenation(ctx)
+    const { symbol } = ctx.params
+    const [list, totalSize] = await LendingAction.findAndCount({
+        where: {
+            token: symbol
+        },
+        order: {
+            block_number: 'ASC'
+        },
+        take: pageSize,
+        skip,
+    })
+    const pageCount = Math.floor(totalSize / pageSize) + 1
+    ctx.body = Resp.Ok({
+        pageIndex,
+        pageSize,
+        totalSize,
+        pageCount,
+        list,
+    })
     return next()
 }

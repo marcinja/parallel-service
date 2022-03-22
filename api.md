@@ -7,12 +7,17 @@ parallel lending service api doc
 
 - [Action](#Action)
   - [GetActionList](#GetActionList)
+  - [GetActionListBySymbol](#GetActionListBySymbol)
 - [Asset](#Asset)
   - [GetAllAssets](#GetAllAssets)
   - [GetLatestAssetByAssetId](#GetLatestAssetByAssetId)
   - [GetLatestAssets](#GetLatestAssets)
 - [Health](#Health)
   - [healthCheck](#healthCheck)
+- [Liquidity](#Liquidity)
+  - [GetAssetsValue](#GetAssetsValue)
+  - [GetPoolLiquidityById](#GetPoolLiquidityById)
+  - [GetPoolList](#GetPoolList)
 - [Market](#Market)
   - [GetAllMarkets](#GetAllMarkets)
   - [GetLatestMarketBySymbol](#GetLatestMarketBySymbol)
@@ -20,8 +25,6 @@ parallel lending service api doc
 - [Position](#Position)
   - [GetLatestPositions](#GetLatestPositions)
   - [GetPositionList](#GetPositionList)
-- [Usersbruceparallel-servicev1mmaction.ts](#Usersbruceparallel-servicev1mmaction.ts)
-  - [GetActionList](#GetActionList)
 
 ___
 
@@ -34,7 +37,7 @@ ___
 <p>get action list by the query parameters. All of they can be use in combination or individually according to your requirments.</p>
 
 ```
-GET /api/v1/mm/actions
+GET /api/v1/mm/action
 ```
 
 ### Query Parameters
@@ -44,7 +47,6 @@ GET /api/v1/mm/actions
 | startBlock | `Number` | <p>actions more than startBlock</p> |
 | endBlock | `Number` | <p>actions lessn than or equal to endBlock</p> |
 | address | `String` | <p>user address</p> |
-| symbol | `String` | <p>asset symbol, e.g. KSM</p> |
 | pageIndex | `Number` | <p>paganation</p> |
 | pageSize | `Number` | <p>paganation</p> |
 
@@ -91,7 +93,7 @@ GET /api/v1/mm/actions
             {
                 "id": "0x5fa6a75d1028d1eda34e7630e41d744cf8c5169c3fc74da81eb5d87e5d58c4f5",
                 "address": "hJLQoRFTEnxkAz4m15N29btT5vvn6gLCzjm5dZYaVRPtrRZLK",
-                "token": "KSM",
+                "token": "sKSM",
                 "amount": "100000000000000",
                 "method": "Borrowed",
                 "supply_balance": "50000000000000000",
@@ -116,6 +118,15 @@ GET /api/v1/mm/actions
  msg: 'invalid parameter',
  data: {}
 }
+```
+
+## <a name='GetActionListBySymbol'></a> GetActionListBySymbol
+[Back to top](#top)
+
+<p>get action list by symbol</p>
+
+```
+GET /api/v1/mm/action/:symbol
 ```
 
 # <a name='Asset'></a> Asset
@@ -253,6 +264,194 @@ GET /api/health
  data: {
      status: 'ok'
  }
+```
+
+# <a name='Liquidity'></a> Liquidity
+
+## <a name='GetAssetsValue'></a> GetAssetsValue
+[Back to top](#top)
+
+<p>get asset value list.</p>
+
+```
+GET /api/v1/amm/assets/value
+```
+
+### Query Parameters
+
+| Name     | Type       | Description                           |
+|----------|------------|---------------------------------------|
+| pageIndex | `Number` | <p>paganation</p> |
+| pageSize | `Number` | <p>paganation</p> |
+
+### Success response example
+
+#### Success response example - `success`
+
+```json
+{
+    "code": 0,
+    "msg": "ok",
+    "data": {
+        "pageIndex": 1,
+        "pageSize": 3,
+        "totalSize": 9,
+        "pageCount": 4,
+        "list": [
+            {
+                "id": "102-1647928800000",
+                "asset_id": 102,
+                "symbol": "USDT",
+                "value": "1000400000000000000",
+                "block_number": 948032,
+                "block_timestamp": "2022-03-22T06:43:30.000Z"
+            },
+            {
+                "id": "100-1647928800000",
+                "asset_id": 100,
+                "symbol": "KSM",
+                "value": "155448578614517399552",
+                "block_number": 948033,
+                "block_timestamp": "2022-03-22T06:43:48.000Z"
+            },
+            {
+                "id": "101-1647932400000",
+                "asset_id": 101,
+                "symbol": "DOT",
+                "value": "19783501147136991232",
+                "block_number": 948232,
+                "block_timestamp": "2022-03-22T07:48:06.000Z"
+            }
+        ]
+    }
+}
+```
+
+### Error response example
+
+#### Error response example - `error`
+
+```json
+{
+ code: 2001,
+ msg: 'invalid parameter',
+ data: {}
+}
+```
+
+## <a name='GetPoolLiquidityById'></a> GetPoolLiquidityById
+[Back to top](#top)
+
+<p>get pool liquidity list by pool id</p>
+
+```
+GET /api/v1/amm/pool/liquidity/:poolId
+```
+
+### Query Parameters
+
+| Name     | Type       | Description                           |
+|----------|------------|---------------------------------------|
+| pageIndex | `Number` | <p>paganation</p> |
+| pageSize | `Number` | <p>paganation</p> |
+
+### Success response example
+
+#### Success response example - `success`
+
+```json
+{
+    "code": 0,
+    "msg": "ok",
+    "data": {
+        "pageIndex": 1,
+        "pageSize": 3,
+        "totalSize": 9,
+        "pageCount": 4,
+        "list": [
+             {
+                "id": "5002-1647216000000",
+                "poolId": 5002,
+                "baseVolume": "50000000000000",
+                "quoteVolume": "25000000000000000",
+                "block_number": 915893,
+                "block_timestamp": "2022-03-15T06:00:12.357Z"
+            },
+            {
+                "id": "5002-1647302400000",
+                "poolId": 5002,
+                "baseVolume": "46886295133536",
+                "quoteVolume": "27756699367308444",
+                "block_number": 920577,
+                "block_timestamp": "2022-03-16T07:00:06.415Z"
+            },
+            {
+                "id": "5002-1647388800000",
+                "poolId": 5002,
+                "baseVolume": "34610705558112",
+                "quoteVolume": "38637364380875724",
+                "block_number": 925169,
+                "block_timestamp": "2022-03-17T07:59:30.335Z"
+            }
+        ]
+    }
+}
+```
+
+### Error response example
+
+#### Error response example - `error`
+
+```json
+{
+ code: 2001,
+ msg: 'invalid parameter',
+ data: {}
+}
+```
+
+## <a name='GetPoolList'></a> GetPoolList
+[Back to top](#top)
+
+<p>get liquidity pool list.</p>
+
+```
+GET /api/v1/amm/pool/list
+```
+
+### Success response example
+
+#### Success response example - `success`
+
+```json
+{
+    "code": 0,
+    "msg": "ok",
+    "data": [
+        {
+            "id": 5003,
+            "trader": "hJFU3r4zioT39AaBiTriJCVvoepeEGViF38DAkKECUjVwsvZK",
+            "base_id": 1000,
+            "quote_id": 100,
+            "base_symbol": "sKSM",
+            "quote_symbol": "KSM",
+            "block_number": 915478,
+            "block_timestamp": "2022-03-15T03:51:24.712Z"
+        }
+    ]
+}
+```
+
+### Error response example
+
+#### Error response example - `error`
+
+```json
+{
+ code: 2001,
+ msg: 'invalid parameter',
+ data: {}
+}
 ```
 
 # <a name='Market'></a> Market
@@ -423,14 +622,5 @@ GET /api/v1/mm/position
             }
         ]
     }
-```
-
-# <a name='Usersbruceparallel-servicev1mmaction.ts'></a> Usersbruceparallel-servicev1mmaction.ts
-
-## <a name='GetActionList'></a> GetActionList
-[Back to top](#top)
-
-```
-GET /api/v1/mm/actions
 ```
 

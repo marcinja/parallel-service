@@ -4,10 +4,13 @@ import { LiquidityPool } from '../../models/liquidity_pool'
 
 export async function getLiquidityVolume(ctx: Context, next: Next) {
     const { pageIndex, pageSize, skip } = parsePagenation(ctx)
-
+    const { poolId } = ctx.params
     const [list, totalSize] = await LiquidityPool.findAndCount({
         order: {
             block_number: 'ASC',
+        },
+        where: {
+            poolId
         },
         take: pageSize,
         skip,

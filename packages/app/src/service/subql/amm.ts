@@ -7,7 +7,7 @@ import { Pool } from '../../models/pool'
 import { AssetValue } from '../../models/asset_value'
 import { LiquidityPool } from '../../models/liquidity_pool'
 const log = getAppLogger('subql-amm')
-const FETCH_BLOCK = 1
+const FETCH_BLOCK = 100
 
 type PoolNode = {
     id: number
@@ -176,7 +176,8 @@ const ammSubql = (block: number) =>
             orderBy: BLOCK_HEIGHT_ASC,
             filter: {
                 blockHeight: {
-                    equalTo: ${block},
+                    greaterThanOrEqualTo: ${block},
+                    lessThan: ${block + FETCH_BLOCK}
                 }
             }
         ) {
@@ -194,7 +195,8 @@ const ammSubql = (block: number) =>
           orderBy: BLOCK_HEIGHT_ASC,
             filter: {
                 blockHeight: {
-                    equalTo: ${block},
+                    greaterThanOrEqualTo: ${block},
+                    lessThan: ${block + FETCH_BLOCK}
                 }
             }
         ) {
@@ -217,7 +219,8 @@ const ammSubql = (block: number) =>
           orderBy: BLOCK_HEIGHT_ASC,
             filter: {
                 blockHeight: {
-                    equalTo: ${block},
+                    greaterThanOrEqualTo: ${block},
+                    lessThan: ${block + FETCH_BLOCK}
                 }
             }
         ) {
@@ -237,7 +240,8 @@ const ammSubql = (block: number) =>
           orderBy: BLOCK_HEIGHT_ASC,
             filter: {
                 blockHeight: {
-                    equalTo: ${block},
+                    greaterThanOrEqualTo: ${block},
+                    lessThan: ${block + FETCH_BLOCK}
                 }
             }
         ) {
@@ -256,7 +260,8 @@ const ammSubql = (block: number) =>
           orderBy: BLOCK_HEIGHT_ASC,
             filter: {
                 blockHeight: {
-                    equalTo: ${block},
+                    greaterThanOrEqualTo: ${block},
+                    lessThan: ${block + FETCH_BLOCK}
                 }
             }
         ) {
@@ -275,7 +280,8 @@ const ammSubql = (block: number) =>
           orderBy: BLOCK_HEIGHT_ASC,
             filter: {
                 blockHeight: {
-                    equalTo: ${block},
+                    greaterThanOrEqualTo: ${block},
+                    lessThan: ${block + FETCH_BLOCK}
                 }
             }
         ) {
