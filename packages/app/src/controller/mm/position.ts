@@ -28,30 +28,31 @@ export async function getPositionList(ctx: Context, next: Next) {
 
     let res = {} as any
     let dateList: DateItem[] = []
-    let assets: string[] = []
-    let curDate = dateFormat(list[0].block_timestamp, 'DD/MM/YYYY')
-    list.map((m) => {
-        const date = dateFormat(m.block_timestamp, 'DD/MM/YYYY')
-        res[m.symbol] = res[m.symbol] || []
-        res[m.symbol].push(m)
-        // date list
-        if (curDate === date) {
-            assets.push(m.symbol)
-        } else {
-            dateList.push({
-                date: curDate,
-                assets,
-            })
-            curDate = date
-            assets = []
-            assets.push(m.symbol)
-        }
-    })
-    dateList.push({
-        date: curDate,
-        assets,
-    })
-
+    if (list.length > 0) {
+        let assets: string[] = []
+        let curDate = dateFormat(list[0].block_timestamp, 'DD/MM/YYYY')
+        list.map((m) => {
+            const date = dateFormat(m.block_timestamp, 'DD/MM/YYYY')
+            res[m.symbol] = res[m.symbol] || []
+            res[m.symbol].push(m)
+            // date list
+            if (curDate === date) {
+                assets.push(m.symbol)
+            } else {
+                dateList.push({
+                    date: curDate,
+                    assets,
+                })
+                curDate = date
+                assets = []
+                assets.push(m.symbol)
+            }
+        })
+        dateList.push({
+            date: curDate,
+            assets,
+        })
+    }
     ctx.body = Resp.Ok({
         pageIndex,
         pageSize,
